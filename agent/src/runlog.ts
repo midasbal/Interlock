@@ -22,8 +22,16 @@ export function appendDecision(label: string, decision: GateDecision): void {
   lines.push(`Declared effect: ${JSON.stringify(decision.action.declaredEffect)}`);
   lines.push("");
   lines.push(`Verdict: **${decision.allowed ? "ALLOWED" : "BLOCKED"}**, ${decision.reason}`);
-  lines.push("");
-  lines.push(`Policy result: ${JSON.stringify(decision.policy)}`);
+
+  if (decision.frozen) {
+    lines.push("");
+    lines.push("Blocked by a delegation integrity freeze, before policy, effect verification, or simulate ran.");
+  }
+
+  if (decision.policy) {
+    lines.push("");
+    lines.push(`Policy result: ${JSON.stringify(decision.policy)}`);
+  }
 
   if (decision.effectVerification) {
     lines.push("");
@@ -32,7 +40,7 @@ export function appendDecision(label: string, decision: GateDecision): void {
     lines.push("```json");
     lines.push(JSON.stringify(decision.effectVerification, null, 2));
     lines.push("```");
-  } else {
+  } else if (!decision.frozen) {
     lines.push("");
     lines.push("Effect verification: skipped, blocked at policy before reaching this stage.");
   }

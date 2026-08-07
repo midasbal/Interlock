@@ -16,6 +16,7 @@
     "defense:approval-revoke": "node --env-file=.env --import tsx agent/src/run-outbound-approval-revoke.ts",
     "gate:effect-match": "node --env-file=.env --import tsx agent/src/run-effect-verification-match.ts",
     "gate:effect-mismatch": "node --env-file=.env --import tsx agent/src/run-effect-verification-mismatch.ts",
+    "defense:delegation-monitor": "node --env-file=.env --import tsx agent/src/run-delegation-monitor.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

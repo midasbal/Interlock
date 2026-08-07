@@ -26,8 +26,16 @@ export function appendAgentRun(label: string, run: AgentRunResult): void {
     lines.push(`Proposed: ${describeAction(step.action)}`);
     lines.push("");
     lines.push(`Gate verdict: **${step.decision.allowed ? "ALLOWED" : "BLOCKED"}**, ${step.decision.reason}`);
-    lines.push("");
-    lines.push(`Policy result: ${JSON.stringify(step.decision.policy)}`);
+
+    if (step.decision.frozen) {
+      lines.push("");
+      lines.push("Blocked by a delegation integrity freeze, before policy ran.");
+    }
+
+    if (step.decision.policy) {
+      lines.push("");
+      lines.push(`Policy result: ${JSON.stringify(step.decision.policy)}`);
+    }
 
     if (step.decision.effectVerification) {
       lines.push("");

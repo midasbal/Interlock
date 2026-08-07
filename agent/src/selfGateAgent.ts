@@ -16,6 +16,7 @@ const BALANCE_SAFETY_MARGIN_ETH = 0.00002;
 
 export type AgentOutcome =
   | "landed"
+  | "blocked-frozen"
   | "blocked-policy"
   | "blocked-effect-mismatch"
   | "blocked-unadaptable"
@@ -48,7 +49,10 @@ export class SelfGateAgent {
    * 4. Effect verification mismatch, any reason: never adapt around it either,
    *    a declared-versus-actual discrepancy is stopped and logged immediately,
    *    same as a policy block.
-   * 5. MAX_ATTEMPTS is a hard ceiling regardless of outcome.
+   * 5. Delegation integrity freeze: never adapt around it, stop and log
+   *    immediately. Only an explicit re-affirmation clears a freeze, never a
+   *    retry from this agent.
+   * 6. MAX_ATTEMPTS is a hard ceiling regardless of outcome.
    */
   async proposeAndRun(initialAction: ProposedAction): Promise<AgentRunResult> {
     const steps: AgentStep[] = [];
@@ -62,7 +66,18 @@ export class SelfGateAgent {
         return { steps, outcome: "landed" };
       }
 
-      if (!decision.policy.allowed) {
+      if (decision.frozen) {
+        steps.push({
+          attempt,
+          action,
+          decision,
+          adaptation:
+            "delegation integrity freeze: stopping without retry, only an explicit re-affirmation clears this",
+        });
+        return { steps, outcome: "blocked-frozen" };
+      }
+
+      if (decision.policy && !decision.policy.allowed) {
         steps.push({
           attempt,
           action,

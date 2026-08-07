@@ -40,7 +40,7 @@ async function main() {
   if (decision.allowed) {
     throw new Error("expected a policy block but the gate allowed it");
   }
-  if (decision.policy.allowed) {
+  if (decision.policy?.allowed !== false) {
     throw new Error("expected the policy check specifically to fail");
   }
   if (decision.effectVerification !== undefined) {

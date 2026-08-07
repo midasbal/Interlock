@@ -3,6 +3,7 @@ import { evaluate, loadPolicy } from "../../policy/engine.js";
 import type { Policy, ProposedAction } from "../../policy/types.js";
 import type { EffectVerifier } from "./effectVerifier/verifier.js";
 import type { Executor } from "./executor.js";
+import type { FreezeGuard } from "./freezeGuard.js";
 import type { ExecutionResult, KeeperHubClient } from "./keeperhub/types.js";
 import type { GateDecision } from "./types.js";
 
@@ -13,11 +14,14 @@ const POLL_MAX_ATTEMPTS = 15;
  * The reusable safety gate. Order, and the reason it is this order (cheapest
  * and least ambiguous checks first, so a block happens as early as possible
  * with a clear reason, see docs/ARCHITECTURE.md):
+ *   0. Freeze guards: is there a standing delegation-integrity freeze on this
+ *      wallet. Purely local, instant, checked before anything else, since it
+ *      is a circuit breaker on the wallet itself, not on any one action.
  *   1. Policy (allowlist checks): purely local, instant, no network call.
  *   2. Effect verification: does the real, observed effect of the exact call
  *      match what its author declared, and does nothing watchlisted change.
  *   3. Simulate: would the call revert on KeeperHub's own pre-flight check.
- *   4. Execute, only if all three passed, with an idempotency key, polled to
+ *   4. Execute, only if all four passed, with an idempotency key, polled to
  *      on-chain confirmation.
  * No action reaches a signature unless every stage passes. This is the only
  * implementation of Executor, and the only path in this codebase that holds
@@ -27,11 +31,24 @@ export class Gate implements Executor {
   constructor(
     private readonly client: KeeperHubClient,
     private readonly effectVerifier: EffectVerifier,
-    private readonly policy: Policy = loadPolicy()
+    private readonly policy: Policy = loadPolicy(),
+    private readonly freezeGuards: FreezeGuard[] = []
   ) {}
 
   async run(action: ProposedAction): Promise<GateDecision> {
     const timestamp = new Date().toISOString();
+
+    for (const guard of this.freezeGuards) {
+      if (guard.isFrozen()) {
+        return {
+          action,
+          timestamp,
+          frozen: true,
+          allowed: false,
+          reason: `delegation integrity freeze: ${guard.reason()}`,
+        };
+      }
+    }
 
     const policy = evaluate(action, this.policy);
     if (!policy.allowed) {
