@@ -9,11 +9,37 @@ import { appendNote } from "./detectorRunlog.js";
 const USDC_TOKEN = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
 const WALLET_ADDRESS = "0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078";
 
-// Distinct spender from the flagship breach script, kept clean on its own.
-const ALL_CLEAR_SPENDER = "0xB1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1";
-// Two approvals of 1,000,000 each, cumulative 2,000,000, well under the
-// 5,000,000 cap in policy/invariants.json, both should land.
-const PER_APPROVAL_AMOUNT = "1000000";
+// Two of the three spenders configured in policy/invariants.json's
+// allowanceExposure.monitoredSpenders, approved to a small amount each, so
+// this genuinely exercises the aggregate-exposure check (both are counted)
+// and still stays well clear of both the per-spender cap (3,000,000) and
+// the aggregate cap (5,000,000), regardless of any prior on-chain state,
+// since approve overwrites rather than adds.
+const SPENDER_A = "0xC1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1";
+const SPENDER_B = "0xD2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2";
+const PER_APPROVAL_AMOUNT = "100000";
+
+async function approve(client: KeeperHubRestClient, gate: Gate, label: string, spender: string) {
+  console.log(`${label}: approve(${spender}, ${PER_APPROVAL_AMOUNT})...`);
+  const decision = await gate.run({
+    kind: "contractCall",
+    chainId: "84532",
+    contractAddress: USDC_TOKEN,
+    functionName: "approve",
+    functionArgs: [spender, PER_APPROVAL_AMOUNT],
+    declaredEffect: {
+      kind: "erc20Approve",
+      token: USDC_TOKEN,
+      owner: WALLET_ADDRESS,
+      spender,
+      allowanceBecomes: PER_APPROVAL_AMOUNT,
+    },
+    watchlist: [],
+  });
+  appendDecision(label, decision);
+  console.log(`${label}: allowed=${decision.allowed}, reason=${decision.reason}`);
+  return decision;
+}
 
 /**
  * The honest counterpart to the flagship breach: a sequence that stays
@@ -21,33 +47,10 @@ const PER_APPROVAL_AMOUNT = "1000000";
  */
 async function main() {
   const client = new KeeperHubRestClient();
-  const invariantEngine = new InvariantEngine(loadInvariantConfig(), WALLET_ADDRESS);
-  const gate = new Gate(client, new EffectVerifier(WALLET_ADDRESS), invariantEngine);
+  const gate = new Gate(client, new EffectVerifier(WALLET_ADDRESS), new InvariantEngine(loadInvariantConfig(), WALLET_ADDRESS));
 
-  const decisions = [];
-  for (let i = 1; i <= 2; i++) {
-    console.log(`submitting approval ${i} of 2: approve(${ALL_CLEAR_SPENDER}, ${PER_APPROVAL_AMOUNT})...`);
-    const decision = await gate.run({
-      kind: "contractCall",
-      chainId: "84532",
-      contractAddress: USDC_TOKEN,
-      functionName: "approve",
-      functionArgs: [ALL_CLEAR_SPENDER, PER_APPROVAL_AMOUNT],
-      declaredEffect: {
-        kind: "erc20Approve",
-        token: USDC_TOKEN,
-        owner: WALLET_ADDRESS,
-        spender: ALL_CLEAR_SPENDER,
-        allowanceBecomes: PER_APPROVAL_AMOUNT,
-      },
-      watchlist: [],
-    });
-    appendDecision(`invariant all-clear, approval ${i} of 2`, decision);
-    console.log(`approval ${i}: allowed=${decision.allowed}, reason=${decision.reason}`);
-    decisions.push(decision);
-  }
-
-  const [first, second] = decisions;
+  const first = await approve(client, gate, "all-clear approval 1 of 2, spender A", SPENDER_A);
+  const second = await approve(client, gate, "all-clear approval 2 of 2, spender B", SPENDER_B);
 
   if (!first.allowed || !first.execution?.transactionHash) {
     throw new Error("expected approval 1 to land");
@@ -62,24 +65,30 @@ async function main() {
   console.log(`approval 1 tx: ${first.execution.transactionHash}`);
   console.log(`approval 2 tx: ${second.execution.transactionHash}`);
 
-  const allowance = await client.readContract({
+  const allowanceA = await client.readContract({
     chainId: "84532",
     contractAddress: USDC_TOKEN,
     functionName: "allowance",
-    functionArgs: [WALLET_ADDRESS, ALL_CLEAR_SPENDER],
+    functionArgs: [WALLET_ADDRESS, SPENDER_A],
   });
-  console.log(`confirmed allowance: ${allowance}`);
-  if (String(allowance) !== PER_APPROVAL_AMOUNT) {
-    throw new Error(`expected confirmed allowance ${PER_APPROVAL_AMOUNT} but read ${String(allowance)}`);
+  const allowanceB = await client.readContract({
+    chainId: "84532",
+    contractAddress: USDC_TOKEN,
+    functionName: "allowance",
+    functionArgs: [WALLET_ADDRESS, SPENDER_B],
+  });
+  console.log(`confirmed allowances: A=${allowanceA} B=${allowanceB}`);
+  if (String(allowanceA) !== PER_APPROVAL_AMOUNT || String(allowanceB) !== PER_APPROVAL_AMOUNT) {
+    throw new Error(`expected confirmed allowance ${PER_APPROVAL_AMOUNT} for both spenders`);
   }
 
   appendNote(
-    "2026-08-08: invariant all-clear sequence",
+    "2026-08-09: invariant all-clear sequence, real aggregate exposure under both caps",
     [
-      `Spender: ${ALL_CLEAR_SPENDER}, per-approval amount: ${PER_APPROVAL_AMOUNT}, cap: 5000000.`,
-      `Approval 1 landed: ${first.execution.transactionHash}, invariants passed.`,
-      `Approval 2 landed: ${second.execution.transactionHash}, invariants passed, cumulative tally 2000000, under the cap.`,
-      `Confirmed allowance on-chain: ${allowance}.`,
+      `Spenders: A=${SPENDER_A}, B=${SPENDER_B}, per-approval amount ${PER_APPROVAL_AMOUNT}, per-spender cap 3000000, aggregate cap 5000000.`,
+      `Approval 1 (A) landed: ${first.execution.transactionHash}, invariants passed.`,
+      `Approval 2 (B) landed: ${second.execution.transactionHash}, invariants passed.`,
+      `Confirmed on-chain allowances: A=${allowanceA}, B=${allowanceB}.`,
     ].join("\n")
   );
 }

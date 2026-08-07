@@ -22,6 +22,7 @@
     "policy:anchor": "node --env-file=.env --import tsx agent/src/run-policy-anchor.ts",
     "invariant:flagship": "node --env-file=.env --import tsx agent/src/run-invariant-flagship.ts",
     "invariant:all-clear": "node --env-file=.env --import tsx agent/src/run-invariant-all-clear.ts",
+    "invariant:outflow": "node --env-file=.env --import tsx agent/src/run-invariant-outflow.ts",
     "test": "node --env-file=.env --import tsx --test agent/src/test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },

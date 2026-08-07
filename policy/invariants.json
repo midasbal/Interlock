@@ -6,9 +6,15 @@
       "owner": "0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078"
     }
   ],
-  "approvalCapPerSpender": {
+  "allowanceExposure": {
     "token": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-    "capAmount": "5000000"
+    "perSpenderCap": "3000000",
+    "aggregateCap": "5000000",
+    "monitoredSpenders": [
+      "0xC1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1",
+      "0xD2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2D2",
+      "0xE3E3E3E3E3E3E3E3E3E3E3E3E3E3E3E3E3E3E3E3"
+    ]
   },
   "watchedSlots": [
     {

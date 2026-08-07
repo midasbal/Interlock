@@ -71,9 +71,18 @@ export interface MonitoredTokenBalance {
   owner: string;
 }
 
-export interface ApprovalCapPerSpender {
+/**
+ * Exposure is measured as real outstanding allowance, read from the state
+ * diff for the spender being approved and from live allowance reads for
+ * the other monitored spenders, never a session sum of approve amounts:
+ * approve overwrites the on-chain allowance, it does not add to it, so
+ * summing approve calls would overcount real exposure.
+ */
+export interface AllowanceExposureConfig {
   token: string;
-  capAmount: string;
+  perSpenderCap: string;
+  aggregateCap: string;
+  monitoredSpenders: string[];
 }
 
 export interface WatchedSlotInvariant {
@@ -84,7 +93,7 @@ export interface WatchedSlotInvariant {
 
 export interface InvariantConfig {
   monitoredTokenBalances: MonitoredTokenBalance[];
-  approvalCapPerSpender: ApprovalCapPerSpender;
+  allowanceExposure: AllowanceExposureConfig;
   watchedSlots: WatchedSlotInvariant[];
   cumulativeNetOutflowBoundWei: string;
 }

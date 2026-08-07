@@ -1,5 +1,6 @@
 import { rpcCall } from "../rpc/baseSepolia.js";
 import { readWithStateOverride, type StateDiffResult } from "../effectVerifier/stateDiff.js";
+import { decodeUint256, encodeAllowanceCalldata } from "../effectVerifier/abiEncoding.js";
 import type { InvariantConfig, ProposedAction } from "../../../policy/types.js";
 
 // balanceOf(address) selector, confirmed live with cast sig, standard ERC-20.
@@ -23,13 +24,20 @@ export interface InvariantEvaluation {
 /**
  * Standing rules evaluated against the aggregated simulated state (the same
  * state diff effect verification already computed, reused here, never
- * re-traced) and a session-level running tally the gate maintains across
- * actions. Distinct from policy (calldata patterns) and effect verification
- * (one action's own declared-versus-actual effect): invariants reason about
- * what is true in aggregate, independent of what any single action claims.
+ * re-traced) and, for net outflow only, a session-level running tally.
+ * Distinct from policy (calldata patterns) and effect verification (one
+ * action's own declared-versus-actual effect): invariants reason about what
+ * is true in aggregate, independent of what any single action claims.
+ *
+ * Allowance exposure is measured as real outstanding allowance, never a
+ * session sum of approve amounts. A real ERC-20 approve overwrites the
+ * on-chain allowance, it does not add to it, so summing approve calls
+ * would overcount real exposure, that flaw was fixed here: the per-spender
+ * check reads the resulting allowance from the action's own state diff, and
+ * the aggregate check sums the resulting allowance for the spender being
+ * approved plus live allowance reads for every other monitored spender.
  */
 export class InvariantEngine {
-  private readonly approvalTallyBySpender = new Map<string, bigint>();
   private cumulativeNetOutflowWei = 0n;
 
   constructor(
@@ -44,10 +52,7 @@ export class InvariantEngine {
       checks.push(await this.checkTokenBalanceNoDecrease(monitored, stateDiff));
     }
 
-    const approvalCheck = this.checkApprovalCapPerSpender(action);
-    if (approvalCheck) {
-      checks.push(approvalCheck);
-    }
+    checks.push(...(await this.checkAllowanceExposure(action, stateDiff)));
 
     for (const watched of this.config.watchedSlots) {
       checks.push(await this.checkWatchedSlot(watched, stateDiff));
@@ -61,17 +66,13 @@ export class InvariantEngine {
     return { verdict: checks.every((c) => c.passed) ? "pass" : "breach", checks };
   }
 
-  /** Only call once the action has actually been allowed and lands. Updates the running session tallies. */
+  /**
+   * Only call once the action has actually been allowed and lands. Updates
+   * the net-outflow running tally, the only invariant here that still needs
+   * one, since real outstanding allowance is read fresh from chain state
+   * every time and needs no session bookkeeping at all.
+   */
   commit(action: ProposedAction): void {
-    if (
-      action.kind === "contractCall" &&
-      action.declaredEffect.kind === "erc20Approve" &&
-      action.declaredEffect.token.toLowerCase() === this.config.approvalCapPerSpender.token.toLowerCase()
-    ) {
-      const spenderKey = action.declaredEffect.spender.toLowerCase();
-      const existing = this.approvalTallyBySpender.get(spenderKey) ?? 0n;
-      this.approvalTallyBySpender.set(spenderKey, existing + BigInt(action.declaredEffect.allowanceBecomes));
-    }
     if (
       action.kind === "transfer" &&
       action.declaredEffect.kind === "nativeTransfer" &&
@@ -108,22 +109,75 @@ export class InvariantEngine {
     };
   }
 
-  private checkApprovalCapPerSpender(action: ProposedAction): InvariantCheckResult | null {
-    if (action.kind !== "contractCall" || action.declaredEffect.kind !== "erc20Approve") {
-      return null;
+  /**
+   * Two checks against real outstanding allowance for the configured token,
+   * only when this action is an approve on that token, otherwise neither
+   * applies since no monitored spender's real allowance would change.
+   */
+  private async checkAllowanceExposure(
+    action: ProposedAction,
+    stateDiff: StateDiffResult
+  ): Promise<InvariantCheckResult[]> {
+    const cfg = this.config.allowanceExposure;
+    if (
+      !(
+        action.kind === "contractCall" &&
+        action.declaredEffect.kind === "erc20Approve" &&
+        action.declaredEffect.token.toLowerCase() === cfg.token.toLowerCase()
+      )
+    ) {
+      return [];
     }
-    if (action.declaredEffect.token.toLowerCase() !== this.config.approvalCapPerSpender.token.toLowerCase()) {
-      return null;
-    }
-    const spenderKey = action.declaredEffect.spender.toLowerCase();
-    const existing = this.approvalTallyBySpender.get(spenderKey) ?? 0n;
-    const prospective = existing + BigInt(action.declaredEffect.allowanceBecomes);
-    const cap = BigInt(this.config.approvalCapPerSpender.capAmount);
-    return {
-      name: "approval-cap-per-spender",
-      passed: prospective <= cap,
-      detail: `cumulative approval to ${action.declaredEffect.spender} would become ${prospective}, cap is ${cap}`,
+
+    const spender = action.declaredEffect.spender;
+    const resultingAllowance = await this.readResultingAllowance(cfg.token, spender, stateDiff);
+    const perSpenderCap = BigInt(cfg.perSpenderCap);
+
+    const perSpenderCheck: InvariantCheckResult = {
+      name: "allowance-per-spender-cap",
+      passed: resultingAllowance <= perSpenderCap,
+      detail: `resulting real allowance to ${spender} would be ${resultingAllowance}, per-spender cap is ${perSpenderCap}`,
     };
+
+    let aggregate = 0n;
+    for (const monitoredSpender of cfg.monitoredSpenders) {
+      aggregate +=
+        monitoredSpender.toLowerCase() === spender.toLowerCase()
+          ? resultingAllowance
+          : await this.readLiveAllowance(cfg.token, monitoredSpender);
+    }
+    const aggregateCap = BigInt(cfg.aggregateCap);
+    const aggregateCheck: InvariantCheckResult = {
+      name: "allowance-aggregate-exposure-cap",
+      passed: aggregate <= aggregateCap,
+      detail: `aggregate real outstanding allowance across monitored spenders would be ${aggregate}, aggregate cap is ${aggregateCap}`,
+    };
+
+    return [perSpenderCheck, aggregateCheck];
+  }
+
+  private async readResultingAllowance(token: string, spender: string, stateDiff: StateDiffResult): Promise<bigint> {
+    const storageDiff = stateDiff.post[token.toLowerCase()]?.storage ?? {};
+    const hex =
+      Object.keys(storageDiff).length === 0
+        ? await this.readLiveAllowanceHex(token, spender)
+        : await readWithStateOverride(
+            { from: this.walletAddress, to: token, data: encodeAllowanceCalldata(this.walletAddress, spender) },
+            token,
+            storageDiff
+          );
+    return decodeUint256(hex);
+  }
+
+  private async readLiveAllowance(token: string, spender: string): Promise<bigint> {
+    return decodeUint256(await this.readLiveAllowanceHex(token, spender));
+  }
+
+  private async readLiveAllowanceHex(token: string, spender: string): Promise<string> {
+    return rpcCall<string>("eth_call", [
+      { to: token, data: encodeAllowanceCalldata(this.walletAddress, spender) },
+      "latest",
+    ]);
   }
 
   private async checkWatchedSlot(

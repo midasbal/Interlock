@@ -1,6 +1,9 @@
 {
   "chainAllowlist": ["84532"],
-  "recipientAllowlist": ["0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078"],
+  "recipientAllowlist": [
+    "0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078",
+    "0xF4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4"
+  ],
   "maxValueEth": "0.02",
   "contractCall": {
     "targetAllowlist": [
