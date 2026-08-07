@@ -13,9 +13,12 @@
     "gate:token-approve": "node --env-file=.env --import tsx agent/src/run-token-approve.ts",
     "gate:token-revoke": "node --env-file=.env --import tsx agent/src/run-token-revoke.ts",
     "gate:contract-policy-block": "node --env-file=.env --import tsx agent/src/run-contract-policy-block.ts",
+    "defense:approval-revoke": "node --env-file=.env --import tsx agent/src/run-outbound-approval-revoke.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@openzeppelin/contracts": "^5.6.1",
+    "@openzeppelin/contracts-upgradeable": "^5.6.1",
     "@types/node": "^26.1.2",
     "tsx": "^4.23.11",
     "typescript": "^7.0.2"
