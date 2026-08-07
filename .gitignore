@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+out/
+cache/
+broadcast/
+*.log
+.DS_Store
+
+# local-only project docs, never committed
+CLAUDE.md
+docs/
