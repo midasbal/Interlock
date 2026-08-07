@@ -1,0 +1,5 @@
+{
+  "chainAllowlist": ["84532"],
+  "recipientAllowlist": ["0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078"],
+  "maxValueEth": "0.001"
+}
