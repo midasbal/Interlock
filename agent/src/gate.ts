@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { evaluate, loadPolicy } from "../../policy/engine.js";
 import type { Policy, ProposedAction } from "../../policy/types.js";
 import type { Executor } from "./executor.js";
-import type { KeeperHubClient } from "./keeperhub/types.js";
+import type { ExecutionResult, KeeperHubClient } from "./keeperhub/types.js";
 import type { GateDecision } from "./types.js";
 
 const POLL_INTERVAL_MS = 2000;
@@ -13,6 +13,7 @@ const POLL_MAX_ATTEMPTS = 15;
  * No action reaches a signature unless simulate reports it would not revert
  * AND the declarative policy allows it. This is the only implementation of
  * Executor, and the only path in this codebase that holds a KeeperHub client.
+ * Handles both native transfers and contract calls through the same checks.
  */
 export class Gate implements Executor {
   constructor(
@@ -23,11 +24,7 @@ export class Gate implements Executor {
   async run(action: ProposedAction): Promise<GateDecision> {
     const timestamp = new Date().toISOString();
 
-    const simulate = await this.client.simulateTransfer({
-      chainId: action.chainId,
-      toAddress: action.to,
-      amount: action.valueEth,
-    });
+    const simulate = await this.simulate(action);
     const simulateOk = simulate.success === true && simulate.wouldRevert === false;
 
     const policy = evaluate(action, this.policy);
@@ -54,12 +51,7 @@ export class Gate implements Executor {
     }
 
     const idempotencyKey = `interlock-gate-${randomUUID()}`;
-    const execution = await this.client.executeTransfer({
-      chainId: action.chainId,
-      toAddress: action.to,
-      amount: action.valueEth,
-      idempotencyKey,
-    });
+    const execution = await this.execute(action, idempotencyKey);
 
     decision.execution = {
       executionId: execution.executionId ?? "",
@@ -70,9 +62,51 @@ export class Gate implements Executor {
 
     if (execution.executionId) {
       decision.finalStatus = await this.pollUntilFinal(execution.executionId);
+
+      // The immediate execute_contract_call response only carries
+      // executionId and status, unlike execute_transfer's immediate response,
+      // which includes the hash right away, see the friction entry in
+      // docs/BOUNTY.md. Backfill from the polled, on-chain-reconciled status
+      // so decision.execution is never missing a hash the poll actually has.
+      decision.execution.transactionHash ??= decision.finalStatus.transactionHash;
+      decision.execution.transactionLink ??= decision.finalStatus.transactionLink;
     }
 
     return decision;
+  }
+
+  private async simulate(action: ProposedAction): Promise<ExecutionResult> {
+    if (action.kind === "transfer") {
+      return this.client.simulateTransfer({
+        chainId: action.chainId,
+        toAddress: action.to,
+        amount: action.valueEth,
+      });
+    }
+    return this.client.simulateContractCall({
+      chainId: action.chainId,
+      contractAddress: action.contractAddress,
+      functionName: action.functionName,
+      functionArgs: action.functionArgs,
+    });
+  }
+
+  private async execute(action: ProposedAction, idempotencyKey: string): Promise<ExecutionResult> {
+    if (action.kind === "transfer") {
+      return this.client.executeTransfer({
+        chainId: action.chainId,
+        toAddress: action.to,
+        amount: action.valueEth,
+        idempotencyKey,
+      });
+    }
+    return this.client.executeContractCall({
+      chainId: action.chainId,
+      contractAddress: action.contractAddress,
+      functionName: action.functionName,
+      functionArgs: action.functionArgs,
+      idempotencyKey,
+    });
   }
 
   private async pollUntilFinal(executionId: string) {

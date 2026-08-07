@@ -7,15 +7,40 @@ export interface TransferRequest {
   simulate?: boolean;
 }
 
-export interface TransferResult {
+export interface ContractCallRequest {
+  chainId: string;
+  contractAddress: string;
+  functionName: string;
+  functionArgs: unknown[];
+  value?: string;
+  idempotencyKey?: string;
+  simulate?: boolean;
+}
+
+/**
+ * Shared shape for both a native transfer and a contract call, confirmed
+ * identical live for both endpoints on 2026-08-08, see docs/KEEPERHUB.md.
+ */
+export interface ExecutionResult {
   success: boolean;
   wouldRevert?: boolean;
   gasEstimate?: string;
   revertReason?: string;
+  simulatedReturnValue?: unknown;
   executionId?: string;
   status?: string;
   transactionHash?: string;
   transactionLink?: string;
+}
+
+export type TransferResult = ExecutionResult;
+export type ContractCallResult = ExecutionResult;
+
+export interface ReadContractRequest {
+  chainId: string;
+  contractAddress: string;
+  functionName: string;
+  functionArgs: unknown[];
 }
 
 export interface ExecutionStatus {
@@ -37,5 +62,8 @@ export interface ExecutionStatus {
 export interface KeeperHubClient {
   simulateTransfer(request: TransferRequest): Promise<TransferResult>;
   executeTransfer(request: TransferRequest): Promise<TransferResult>;
+  simulateContractCall(request: ContractCallRequest): Promise<ContractCallResult>;
+  executeContractCall(request: ContractCallRequest): Promise<ContractCallResult>;
+  readContract(request: ReadContractRequest): Promise<unknown>;
   getExecutionStatus(executionId: string): Promise<ExecutionStatus>;
 }

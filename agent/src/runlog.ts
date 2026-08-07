@@ -2,6 +2,7 @@ import { appendFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import type { GateDecision } from "./types.js";
+import { describeAction } from "./describeAction.js";
 
 const RUNLOG_PATH = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -16,9 +17,7 @@ export function appendDecision(label: string, decision: GateDecision): void {
   lines.push("");
   lines.push(`## ${decision.timestamp}: gate decision, ${label}`);
   lines.push("");
-  lines.push(
-    `Action: transfer ${decision.action.valueEth} ETH on chain ${decision.action.chainId} to ${decision.action.to}`
-  );
+  lines.push(`Action: ${describeAction(decision.action)}`);
   lines.push("");
   lines.push(`Verdict: **${decision.allowed ? "ALLOWED" : "BLOCKED"}**, ${decision.reason}`);
   lines.push("");

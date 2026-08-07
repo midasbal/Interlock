@@ -12,6 +12,7 @@ async function main() {
   const gate = new Gate(new KeeperHubRestClient());
 
   const decision = await gate.run({
+    kind: "transfer",
     chainId: "84532",
     to: NOT_ALLOWLISTED_RECIPIENT,
     valueEth: "0.00001",

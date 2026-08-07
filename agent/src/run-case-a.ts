@@ -8,6 +8,7 @@ async function main() {
   const gate = new Gate(new KeeperHubRestClient());
 
   const decision = await gate.run({
+    kind: "transfer",
     chainId: "84532",
     to: WALLET_ADDRESS,
     valueEth: "0.0001",

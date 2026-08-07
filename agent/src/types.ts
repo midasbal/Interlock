@@ -1,10 +1,10 @@
-import type { ExecutionStatus, TransferResult } from "./keeperhub/types.js";
+import type { ExecutionResult, ExecutionStatus } from "./keeperhub/types.js";
 import type { PolicyDecision, ProposedAction } from "../../policy/types.js";
 
 export interface GateDecision {
   action: ProposedAction;
   timestamp: string;
-  simulate: TransferResult;
+  simulate: ExecutionResult;
   policy: PolicyDecision;
   allowed: boolean;
   reason: string;

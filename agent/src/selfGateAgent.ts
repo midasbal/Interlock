@@ -36,9 +36,9 @@ export class SelfGateAgent {
 
   /**
    * Adaptation rules, explicit and bounded:
-   * 1. Would-revert with a parseable "insufficient balance" reason: reduce the
-   *    amount to within the confirmed balance stated in the revert reason,
-   *    minus a small safety margin, and retry.
+   * 1. Transfer action, would-revert with a parseable "insufficient balance"
+   *    reason: reduce the amount to within the confirmed balance stated in
+   *    the revert reason, minus a small safety margin, and retry.
    * 2. Would-revert for any other, unrecognized reason: no honest adaptation
    *    is possible, stop and log rather than guess.
    * 3. Policy block, any reason: never adapt around it, stop and log
@@ -71,7 +71,7 @@ export class SelfGateAgent {
       const revertReason = decision.simulate.revertReason ?? "";
       const match = revertReason.match(BALANCE_REVERT_PATTERN);
 
-      if (decision.simulate.wouldRevert && match) {
+      if (decision.simulate.wouldRevert && action.kind === "transfer" && match) {
         const confirmedBalanceEth = Number(match[1]);
         const adaptedAmount = confirmedBalanceEth - BALANCE_SAFETY_MARGIN_ETH;
 

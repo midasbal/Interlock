@@ -15,6 +15,7 @@ async function main() {
   const agent = new SelfGateAgent(gate);
 
   const run = await agent.proposeAndRun({
+    kind: "transfer",
     chainId: "84532",
     to: WALLET_ADDRESS,
     valueEth: AMOUNT_ABOVE_BALANCE,

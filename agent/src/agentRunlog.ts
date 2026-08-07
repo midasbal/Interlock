@@ -2,6 +2,7 @@ import { appendFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import type { AgentRunResult } from "./selfGateAgent.js";
+import { describeAction } from "./describeAction.js";
 
 const RUNLOG_PATH = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -22,9 +23,7 @@ export function appendAgentRun(label: string, run: AgentRunResult): void {
   for (const step of run.steps) {
     lines.push(`### Attempt ${step.attempt}`);
     lines.push("");
-    lines.push(
-      `Proposed: transfer ${step.action.valueEth} ETH on chain ${step.action.chainId} to ${step.action.to}`
-    );
+    lines.push(`Proposed: ${describeAction(step.action)}`);
     lines.push("");
     lines.push(`Gate verdict: **${step.decision.allowed ? "ALLOWED" : "BLOCKED"}**, ${step.decision.reason}`);
     lines.push("");
