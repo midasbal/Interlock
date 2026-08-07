@@ -3,7 +3,9 @@ import {
   decodeUint256,
   encodeAllowanceCalldata,
   encodeAnchorCalldata,
+  encodeAnchorKeyedCalldata,
   encodeApproveCalldata,
+  encodeKeyedDigestCalldata,
   encodeLastDigestCalldata,
 } from "./abiEncoding.js";
 import { readWithStateOverride, traceCallStateDiff, type StateDiffResult } from "./stateDiff.js";
@@ -15,6 +17,8 @@ export interface EffectVerificationResult {
   declared: DeclaredEffect;
   observed: Record<string, string>;
   deviations: string[];
+  /** The real state diff this verdict was computed from, reused by invariant checks so they never re-trace. */
+  stateDiff: StateDiffResult;
 }
 
 function balanceDelta(
@@ -89,7 +93,7 @@ export class EffectVerifier {
       this.checkUndeclaredAccounts(diff, [walletKey, recipientKey], deviations);
       this.checkWatchlist(action.watchlist, watchBefore, diff, deviations);
 
-      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations };
+      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations, stateDiff: diff };
     }
 
     if (declared.kind === "erc20Approve" && action.kind === "contractCall") {
@@ -130,7 +134,7 @@ export class EffectVerifier {
       this.checkUndeclaredAccounts(diff, [tokenKey, this.walletAddress.toLowerCase()], deviations);
       this.checkWatchlist(action.watchlist, watchBefore, diff, deviations);
 
-      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations };
+      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations, stateDiff: diff };
     }
 
     if (declared.kind === "auditAnchor" && action.kind === "contractCall") {
@@ -169,7 +173,46 @@ export class EffectVerifier {
       this.checkUndeclaredAccounts(diff, [contractKey, this.walletAddress.toLowerCase()], deviations);
       this.checkWatchlist(action.watchlist, watchBefore, diff, deviations);
 
-      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations };
+      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations, stateDiff: diff };
+    }
+
+    if (declared.kind === "keyedAnchor" && action.kind === "contractCall") {
+      if (action.functionName !== "anchorKeyed") {
+        throw new Error(`keyedAnchor declared effect requires functionName "anchorKeyed", got "${action.functionName}"`);
+      }
+      const [actualKey, actualDigest] = action.functionArgs as [string, string];
+      const callData = encodeAnchorKeyedCalldata(actualKey, actualDigest);
+
+      const diff = await traceCallStateDiff({
+        from: this.walletAddress,
+        to: action.contractAddress,
+        data: callData,
+      });
+
+      const contractKey = declared.contract.toLowerCase();
+      const storageDiff = diff.post[contractKey]?.storage ?? {};
+
+      const afterHex = await readWithStateOverride(
+        {
+          from: this.walletAddress,
+          to: declared.contract,
+          data: encodeKeyedDigestCalldata(declared.committer, declared.key),
+        },
+        declared.contract,
+        storageDiff
+      );
+      observed.keyedDigestAfter = afterHex;
+
+      if (afterHex.toLowerCase() !== declared.digest.toLowerCase()) {
+        deviations.push(
+          `keyedDigest(${declared.committer}, ${declared.key}) on ${declared.contract} became ${afterHex}, declared effect said it becomes ${declared.digest}`
+        );
+      }
+
+      this.checkUndeclaredAccounts(diff, [contractKey, this.walletAddress.toLowerCase()], deviations);
+      this.checkWatchlist(action.watchlist, watchBefore, diff, deviations);
+
+      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations, stateDiff: diff };
     }
 
     throw new Error(`declared effect kind "${declared.kind}" does not match action kind "${action.kind}"`);

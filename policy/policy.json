@@ -5,8 +5,8 @@
   "contractCall": {
     "targetAllowlist": [
       "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-      "0x0dDD39Da7c5f7DFe263cEE4866d1525895371E90"
+      "0x174Aa8859aFFCFC0E8C8C30Ed320f95541D075f4"
     ],
-    "functionAllowlist": ["approve", "anchor"]
+    "functionAllowlist": ["approve", "anchor", "anchorKeyed"]
   }
 }

@@ -4,6 +4,7 @@ import type { Policy, ProposedAction } from "../../policy/types.js";
 import type { EffectVerifier } from "./effectVerifier/verifier.js";
 import type { Executor } from "./executor.js";
 import type { FreezeGuard } from "./freezeGuard.js";
+import type { InvariantEngine } from "./invariants/engine.js";
 import type { ExecutionResult, KeeperHubClient } from "./keeperhub/types.js";
 import type { GateDecision } from "./types.js";
 
@@ -20,9 +21,14 @@ const POLL_MAX_ATTEMPTS = 15;
  *   1. Policy (allowlist checks): purely local, instant, no network call.
  *   2. Effect verification: does the real, observed effect of the exact call
  *      match what its author declared, and does nothing watchlisted change.
- *   3. Simulate: would the call revert on KeeperHub's own pre-flight check.
- *   4. Execute, only if all four passed, with an idempotency key, polled to
- *      on-chain confirmation.
+ *   3. Invariants: standing rules against the aggregated simulated state and
+ *      the session-level running tally, reusing the state diff effect
+ *      verification already computed, no extra trace. Distinct from policy
+ *      (calldata shape) and effect verification (one action's own declared
+ *      effect): invariants reason about the aggregate, not any single action.
+ *   4. Simulate: would the call revert on KeeperHub's own pre-flight check.
+ *   5. Execute, only if all five passed, with an idempotency key, polled to
+ *      on-chain confirmation, then the invariant tallies are committed.
  * No action reaches a signature unless every stage passes. This is the only
  * implementation of Executor, and the only path in this codebase that holds
  * a KeeperHub client.
@@ -31,6 +37,7 @@ export class Gate implements Executor {
   constructor(
     private readonly client: KeeperHubClient,
     private readonly effectVerifier: EffectVerifier,
+    private readonly invariantEngine: InvariantEngine,
     private readonly policy: Policy = loadPolicy(),
     private readonly freezeGuards: FreezeGuard[] = []
   ) {}
@@ -73,6 +80,20 @@ export class Gate implements Executor {
       };
     }
 
+    const invariants = await this.invariantEngine.evaluate(action, effectVerification.stateDiff);
+    if (invariants.verdict !== "pass") {
+      const breaches = invariants.checks.filter((c) => !c.passed);
+      return {
+        action,
+        timestamp,
+        policy,
+        effectVerification,
+        invariants,
+        allowed: false,
+        reason: `invariant blocked it: ${breaches.map((b) => `${b.name} (${b.detail})`).join("; ")}`,
+      };
+    }
+
     const simulate = await this.simulate(action);
     const simulateOk = simulate.success === true && simulate.wouldRevert === false;
     if (!simulateOk) {
@@ -81,6 +102,7 @@ export class Gate implements Executor {
         timestamp,
         policy,
         effectVerification,
+        invariants,
         simulate,
         allowed: false,
         reason: `simulate blocked it: ${simulate.revertReason ?? "success was false or wouldRevert was true"}`,
@@ -92,9 +114,10 @@ export class Gate implements Executor {
       timestamp,
       policy,
       effectVerification,
+      invariants,
       simulate,
       allowed: true,
-      reason: "policy passed, effect verification matched, simulate passed",
+      reason: "policy passed, effect verification matched, invariants held, simulate passed",
     };
 
     const idempotencyKey = `interlock-gate-${randomUUID()}`;
@@ -118,6 +141,11 @@ export class Gate implements Executor {
       decision.execution.transactionHash ??= decision.finalStatus.transactionHash;
       decision.execution.transactionLink ??= decision.finalStatus.transactionLink;
     }
+
+    // Only commit the running invariant tallies once the action has actually
+    // landed, a blocked or failed action must never contribute to the
+    // cumulative state future decisions are checked against.
+    this.invariantEngine.commit(action);
 
     return decision;
   }

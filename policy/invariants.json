@@ -1,0 +1,21 @@
+{
+  "monitoredTokenBalances": [
+    {
+      "label": "wallet USDC balance",
+      "token": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "owner": "0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078"
+    }
+  ],
+  "approvalCapPerSpender": {
+    "token": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "capAmount": "5000000"
+  },
+  "watchedSlots": [
+    {
+      "label": "USDC proxy admin slot",
+      "contractAddress": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "slot": "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b"
+    }
+  ],
+  "cumulativeNetOutflowBoundWei": "1000000000000000"
+}

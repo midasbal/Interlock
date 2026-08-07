@@ -48,6 +48,15 @@ export function appendDecision(label: string, decision: GateDecision): void {
     lines.push("Effect verification: skipped, blocked at policy before reaching this stage.");
   }
 
+  if (decision.invariants) {
+    lines.push("");
+    lines.push(`Invariants checked (verdict ${decision.invariants.verdict}):`);
+    lines.push("");
+    lines.push("```json");
+    lines.push(JSON.stringify(decision.invariants, null, 2));
+    lines.push("```");
+  }
+
   if (decision.simulate) {
     lines.push("");
     lines.push("Simulate result:");

@@ -1,6 +1,8 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
 import { EffectVerifier } from "./effectVerifier/verifier.js";
+import { InvariantEngine } from "./invariants/engine.js";
+import { loadInvariantConfig } from "./invariants/loadInvariantConfig.js";
 import { appendDecision } from "./runlog.js";
 import type { WatchedInvariant } from "../../policy/types.js";
 
@@ -36,7 +38,11 @@ const WATCHLIST: WatchedInvariant[] = [
  */
 async function main() {
   const client = new KeeperHubRestClient();
-  const gate = new Gate(client, new EffectVerifier(WALLET_ADDRESS));
+  const gate = new Gate(
+    client,
+    new EffectVerifier(WALLET_ADDRESS),
+    new InvariantEngine(loadInvariantConfig(), WALLET_ADDRESS)
+  );
 
   const decision = await gate.run({
     kind: "contractCall",

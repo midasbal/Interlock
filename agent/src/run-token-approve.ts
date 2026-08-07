@@ -1,6 +1,8 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
 import { EffectVerifier } from "./effectVerifier/verifier.js";
+import { InvariantEngine } from "./invariants/engine.js";
+import { loadInvariantConfig } from "./invariants/loadInvariantConfig.js";
 import { appendDecision } from "./runlog.js";
 
 // Circle's official USDC on Base Sepolia, confirmed live on 2026-08-08 by
@@ -16,7 +18,11 @@ const APPROVE_AMOUNT = "1000000"; // 1 USDC at 6 decimals
 
 async function main() {
   const client = new KeeperHubRestClient();
-  const gate = new Gate(client, new EffectVerifier(WALLET_ADDRESS));
+  const gate = new Gate(
+    client,
+    new EffectVerifier(WALLET_ADDRESS),
+    new InvariantEngine(loadInvariantConfig(), WALLET_ADDRESS)
+  );
 
   const decision = await gate.run({
     kind: "contractCall",

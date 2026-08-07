@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { KeeperHubRestClient } from "../keeperhub/restClient.js";
 import { Gate } from "../gate.js";
 import { EffectVerifier } from "../effectVerifier/verifier.js";
+import { InvariantEngine } from "../invariants/engine.js";
+import { loadInvariantConfig } from "../invariants/loadInvariantConfig.js";
 import { appendDecision } from "../runlog.js";
 import type { FreezeGuard } from "../freezeGuard.js";
 
@@ -23,7 +25,13 @@ const ACTUAL_SPENDER = "0x7E7E7E7E7E7E7E7E7E7E7E7E7E7E7E7E7E7E7E7E";
 const LAND_SPENDER = "0x8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F8F";
 
 function buildGate(freezeGuards: FreezeGuard[] = []) {
-  return new Gate(new KeeperHubRestClient(), new EffectVerifier(WALLET), undefined, freezeGuards);
+  return new Gate(
+    new KeeperHubRestClient(),
+    new EffectVerifier(WALLET),
+    new InvariantEngine(loadInvariantConfig(), WALLET),
+    undefined,
+    freezeGuards
+  );
 }
 
 test("policy: target contract not allowlisted blocks, nothing broadcast [no chain call]", async () => {
@@ -186,7 +194,7 @@ test("honest positive: compliant self-transfer is allowed and lands [chain: land
 
 test("honest positive: compliant USDC approve is allowed, lands, and the allowance is confirmed on-chain [chain: lands a real tx]", async () => {
   const client = new KeeperHubRestClient();
-  const gate = new Gate(client, new EffectVerifier(WALLET));
+  const gate = new Gate(client, new EffectVerifier(WALLET), new InvariantEngine(loadInvariantConfig(), WALLET));
   const amount = "3000000";
 
   const decision = await gate.run({

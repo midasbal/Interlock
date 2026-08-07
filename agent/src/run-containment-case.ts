@@ -1,6 +1,8 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
 import { EffectVerifier } from "./effectVerifier/verifier.js";
+import { InvariantEngine } from "./invariants/engine.js";
+import { loadInvariantConfig } from "./invariants/loadInvariantConfig.js";
 import { SelfGateAgent } from "./selfGateAgent.js";
 import { appendAgentRun } from "./agentRunlog.js";
 
@@ -12,7 +14,11 @@ const WALLET_ADDRESS = "0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078";
 const NOT_ALLOWLISTED_RECIPIENT = "0x000000000000000000000000000000000000dEaD";
 
 async function main() {
-  const gate = new Gate(new KeeperHubRestClient(), new EffectVerifier(WALLET_ADDRESS));
+  const gate = new Gate(
+    new KeeperHubRestClient(),
+    new EffectVerifier(WALLET_ADDRESS),
+    new InvariantEngine(loadInvariantConfig(), WALLET_ADDRESS)
+  );
   const agent = new SelfGateAgent(gate);
 
   const run = await agent.proposeAndRun({

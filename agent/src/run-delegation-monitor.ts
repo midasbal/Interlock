@@ -1,6 +1,8 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
 import { EffectVerifier } from "./effectVerifier/verifier.js";
+import { InvariantEngine } from "./invariants/engine.js";
+import { loadInvariantConfig } from "./invariants/loadInvariantConfig.js";
 import { appendDecision } from "./runlog.js";
 import { appendDelegationMonitorEvent, appendNote } from "./delegationMonitorRunlog.js";
 import { DelegationMonitor } from "./delegationMonitor/monitor.js";
@@ -70,9 +72,13 @@ async function main() {
         violation = depEvent;
         console.log(`INTEGRITY VIOLATION on deployer at attempt ${attempt}: ${JSON.stringify(depEvent)}`);
 
-        const gate = new Gate(new KeeperHubRestClient(), new EffectVerifier(DEPLOYER_WALLET), undefined, [
-          deployerMonitor,
-        ]);
+        const gate = new Gate(
+          new KeeperHubRestClient(),
+          new EffectVerifier(DEPLOYER_WALLET),
+          new InvariantEngine(loadInvariantConfig(), DEPLOYER_WALLET),
+          undefined,
+          [deployerMonitor]
+        );
         const refusal = await gate.run({
           kind: "transfer",
           chainId: "84532",

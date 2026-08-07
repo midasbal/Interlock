@@ -37,3 +37,13 @@ export function encodeAnchorCalldata(digest: string): string {
 export function encodeLastDigestCalldata(committer: string): string {
   return `0x8dd8c307${encodeAddress(committer)}`;
 }
+
+// anchorKeyed(bytes32,bytes32) selector, confirmed live with cast sig, keccak256("anchorKeyed(bytes32,bytes32)")[:4]
+export function encodeAnchorKeyedCalldata(key: string, digest: string): string {
+  return `0xe03dc897${encodeBytes32(key)}${encodeBytes32(digest)}`;
+}
+
+// keyedDigest(address,bytes32) selector, confirmed live with cast sig, keccak256("keyedDigest(address,bytes32)")[:4]
+export function encodeKeyedDigestCalldata(committer: string, key: string): string {
+  return `0x108ba06f${encodeAddress(committer)}${encodeBytes32(key)}`;
+}

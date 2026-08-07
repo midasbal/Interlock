@@ -49,6 +49,15 @@ export function appendAgentRun(label: string, run: AgentRunResult): void {
       lines.push("```");
     }
 
+    if (step.decision.invariants) {
+      lines.push("");
+      lines.push(`Invariants checked (verdict ${step.decision.invariants.verdict}):`);
+      lines.push("");
+      lines.push("```json");
+      lines.push(JSON.stringify(step.decision.invariants, null, 2));
+      lines.push("```");
+    }
+
     if (step.decision.simulate) {
       lines.push("");
       lines.push("Simulate result:");

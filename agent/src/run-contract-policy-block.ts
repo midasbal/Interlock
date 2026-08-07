@@ -1,6 +1,8 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
 import { EffectVerifier } from "./effectVerifier/verifier.js";
+import { InvariantEngine } from "./invariants/engine.js";
+import { loadInvariantConfig } from "./invariants/loadInvariantConfig.js";
 import { appendDecision } from "./runlog.js";
 
 const USDC_TOKEN = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
@@ -16,7 +18,11 @@ const TEST_SPENDER = "0x1234567890123456789012345678901234567890";
  * evaluated, since policy blocks first.
  */
 async function main() {
-  const gate = new Gate(new KeeperHubRestClient(), new EffectVerifier(WALLET_ADDRESS));
+  const gate = new Gate(
+    new KeeperHubRestClient(),
+    new EffectVerifier(WALLET_ADDRESS),
+    new InvariantEngine(loadInvariantConfig(), WALLET_ADDRESS)
+  );
 
   const decision = await gate.run({
     kind: "contractCall",

@@ -19,6 +19,7 @@ export type AgentOutcome =
   | "blocked-frozen"
   | "blocked-policy"
   | "blocked-effect-mismatch"
+  | "blocked-invariant"
   | "blocked-unadaptable"
   | "exhausted-retries";
 
@@ -52,7 +53,9 @@ export class SelfGateAgent {
    * 5. Delegation integrity freeze: never adapt around it, stop and log
    *    immediately. Only an explicit re-affirmation clears a freeze, never a
    *    retry from this agent.
-   * 6. MAX_ATTEMPTS is a hard ceiling regardless of outcome.
+   * 6. Invariant breach, any reason: never adapt around it, stop and log
+   *    immediately. A cumulative safety bound is not something to retry past.
+   * 7. MAX_ATTEMPTS is a hard ceiling regardless of outcome.
    */
   async proposeAndRun(initialAction: ProposedAction): Promise<AgentRunResult> {
     const steps: AgentStep[] = [];
@@ -97,6 +100,17 @@ export class SelfGateAgent {
             "effect verification mismatch: stopping without retry, never adapt around a declared-versus-actual discrepancy",
         });
         return { steps, outcome: "blocked-effect-mismatch" };
+      }
+
+      if (decision.invariants && decision.invariants.verdict === "breach") {
+        steps.push({
+          attempt,
+          action,
+          decision,
+          adaptation:
+            "invariant breach: stopping without retry, never adapt around a cumulative safety bound",
+        });
+        return { steps, outcome: "blocked-invariant" };
       }
 
       const revertReason = decision.simulate?.revertReason ?? "";

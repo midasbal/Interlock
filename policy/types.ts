@@ -18,7 +18,8 @@ export interface Policy {
 export type DeclaredEffect =
   | { kind: "nativeTransfer"; recipient: string; amountWei: string }
   | { kind: "erc20Approve"; token: string; owner: string; spender: string; allowanceBecomes: string }
-  | { kind: "auditAnchor"; contract: string; committer: string; digest: string };
+  | { kind: "auditAnchor"; contract: string; committer: string; digest: string }
+  | { kind: "keyedAnchor"; contract: string; committer: string; key: string; digest: string };
 
 /**
  * A sensitive invariant that must not change as a side effect of the
@@ -57,4 +58,33 @@ export type ProposedAction = TransferAction | ContractCallAction;
 export interface PolicyDecision {
   allowed: boolean;
   reason: string;
+}
+
+/**
+ * Standing rules enforced against the aggregated simulated state and a
+ * session-level running tally, independent of what any single action
+ * declares. See agent/src/invariants and docs/ARCHITECTURE.md.
+ */
+export interface MonitoredTokenBalance {
+  label: string;
+  token: string;
+  owner: string;
+}
+
+export interface ApprovalCapPerSpender {
+  token: string;
+  capAmount: string;
+}
+
+export interface WatchedSlotInvariant {
+  label: string;
+  contractAddress: string;
+  slot: string;
+}
+
+export interface InvariantConfig {
+  monitoredTokenBalances: MonitoredTokenBalance[];
+  approvalCapPerSpender: ApprovalCapPerSpender;
+  watchedSlots: WatchedSlotInvariant[];
+  cumulativeNetOutflowBoundWei: string;
 }
