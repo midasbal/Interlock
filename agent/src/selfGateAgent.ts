@@ -1,5 +1,6 @@
 import type { ProposedAction } from "../../policy/types.js";
 import type { Executor } from "./executor.js";
+import { ethStringToWei } from "./effectVerifier/units.js";
 import type { GateDecision } from "./types.js";
 
 /**
@@ -16,6 +17,7 @@ const BALANCE_SAFETY_MARGIN_ETH = 0.00002;
 export type AgentOutcome =
   | "landed"
   | "blocked-policy"
+  | "blocked-effect-mismatch"
   | "blocked-unadaptable"
   | "exhausted-retries";
 
@@ -43,7 +45,10 @@ export class SelfGateAgent {
    *    is possible, stop and log rather than guess.
    * 3. Policy block, any reason: never adapt around it, stop and log
    *    immediately. Policy blocks are never retried.
-   * 4. MAX_ATTEMPTS is a hard ceiling regardless of outcome.
+   * 4. Effect verification mismatch, any reason: never adapt around it either,
+   *    a declared-versus-actual discrepancy is stopped and logged immediately,
+   *    same as a policy block.
+   * 5. MAX_ATTEMPTS is a hard ceiling regardless of outcome.
    */
   async proposeAndRun(initialAction: ProposedAction): Promise<AgentRunResult> {
     const steps: AgentStep[] = [];
@@ -68,10 +73,21 @@ export class SelfGateAgent {
         return { steps, outcome: "blocked-policy" };
       }
 
-      const revertReason = decision.simulate.revertReason ?? "";
+      if (decision.effectVerification && decision.effectVerification.verdict === "mismatch") {
+        steps.push({
+          attempt,
+          action,
+          decision,
+          adaptation:
+            "effect verification mismatch: stopping without retry, never adapt around a declared-versus-actual discrepancy",
+        });
+        return { steps, outcome: "blocked-effect-mismatch" };
+      }
+
+      const revertReason = decision.simulate?.revertReason ?? "";
       const match = revertReason.match(BALANCE_REVERT_PATTERN);
 
-      if (decision.simulate.wouldRevert && action.kind === "transfer" && match) {
+      if (decision.simulate?.wouldRevert && action.kind === "transfer" && match) {
         const confirmedBalanceEth = Number(match[1]);
         const adaptedAmount = confirmedBalanceEth - BALANCE_SAFETY_MARGIN_ETH;
 
@@ -86,9 +102,17 @@ export class SelfGateAgent {
           return { steps, outcome: "blocked-unadaptable" };
         }
 
+        const adaptedValueEth = adaptedAmount.toFixed(6);
         const adaptedAction: ProposedAction = {
           ...action,
-          valueEth: adaptedAmount.toFixed(6),
+          valueEth: adaptedValueEth,
+          declaredEffect:
+            action.declaredEffect.kind === "nativeTransfer"
+              ? {
+                  ...action.declaredEffect,
+                  amountWei: ethStringToWei(adaptedValueEth).toString(),
+                }
+              : action.declaredEffect,
         };
         steps.push({
           attempt,

@@ -1,5 +1,7 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
+import { EffectVerifier } from "./effectVerifier/verifier.js";
+import { ethStringToWei } from "./effectVerifier/units.js";
 import { SelfGateAgent } from "./selfGateAgent.js";
 import { appendAgentRun } from "./agentRunlog.js";
 
@@ -11,7 +13,7 @@ const WALLET_ADDRESS = "0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078";
 const AMOUNT_ABOVE_BALANCE = "0.02";
 
 async function main() {
-  const gate = new Gate(new KeeperHubRestClient());
+  const gate = new Gate(new KeeperHubRestClient(), new EffectVerifier(WALLET_ADDRESS));
   const agent = new SelfGateAgent(gate);
 
   const run = await agent.proposeAndRun({
@@ -19,6 +21,12 @@ async function main() {
     chainId: "84532",
     to: WALLET_ADDRESS,
     valueEth: AMOUNT_ABOVE_BALANCE,
+    declaredEffect: {
+      kind: "nativeTransfer",
+      recipient: WALLET_ADDRESS,
+      amountWei: ethStringToWei(AMOUNT_ABOVE_BALANCE).toString(),
+    },
+    watchlist: [],
   });
 
   appendAgentRun("reliability arc, block then adapt then land", run);

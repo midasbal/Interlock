@@ -1,5 +1,6 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
+import { EffectVerifier } from "./effectVerifier/verifier.js";
 import { appendDecision } from "./runlog.js";
 import { appendDetectorEvent, appendNote } from "./detectorRunlog.js";
 import { ProxyImplementationDetector } from "./detector/proxyImplementationDetector.js";
@@ -18,7 +19,7 @@ function sleep(ms: number) {
 
 async function main() {
   const client = new KeeperHubRestClient();
-  const gate = new Gate(client);
+  const gate = new Gate(client, new EffectVerifier(WALLET_ADDRESS));
 
   console.log("granting USDC approval to the spender proxy through the gate...");
   const grant = await gate.run({
@@ -27,6 +28,14 @@ async function main() {
     contractAddress: USDC_TOKEN,
     functionName: "approve",
     functionArgs: [SPENDER_PROXY, GRANT_AMOUNT],
+    declaredEffect: {
+      kind: "erc20Approve",
+      token: USDC_TOKEN,
+      owner: WALLET_ADDRESS,
+      spender: SPENDER_PROXY,
+      allowanceBecomes: GRANT_AMOUNT,
+    },
+    watchlist: [],
   });
   appendDecision("outbound defense stage, grant USDC approval to spender proxy", grant);
   if (!grant.allowed) {
@@ -70,6 +79,14 @@ async function main() {
       contractAddress: USDC_TOKEN,
       functionName: "approve",
       functionArgs: [SPENDER_PROXY, "0"],
+      declaredEffect: {
+        kind: "erc20Approve",
+        token: USDC_TOKEN,
+        owner: WALLET_ADDRESS,
+        spender: SPENDER_PROXY,
+        allowanceBecomes: "0",
+      },
+      watchlist: [],
     });
     appendDecision("outbound defense stage, autonomous revoke on detected implementation change", revoke);
 

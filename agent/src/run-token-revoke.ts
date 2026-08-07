@@ -1,5 +1,6 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
+import { EffectVerifier } from "./effectVerifier/verifier.js";
 import { appendDecision } from "./runlog.js";
 
 const USDC_TOKEN = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
@@ -13,7 +14,7 @@ const TEST_SPENDER = "0x1234567890123456789012345678901234567890";
  */
 async function main() {
   const client = new KeeperHubRestClient();
-  const gate = new Gate(client);
+  const gate = new Gate(client, new EffectVerifier(WALLET_ADDRESS));
 
   const decision = await gate.run({
     kind: "contractCall",
@@ -21,6 +22,14 @@ async function main() {
     contractAddress: USDC_TOKEN,
     functionName: "approve",
     functionArgs: [TEST_SPENDER, "0"],
+    declaredEffect: {
+      kind: "erc20Approve",
+      token: USDC_TOKEN,
+      owner: WALLET_ADDRESS,
+      spender: TEST_SPENDER,
+      allowanceBecomes: "0",
+    },
+    watchlist: [],
   });
 
   appendDecision("token approve (revoke to zero), USDC via gate", decision);

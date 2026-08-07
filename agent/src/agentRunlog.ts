@@ -27,13 +27,25 @@ export function appendAgentRun(label: string, run: AgentRunResult): void {
     lines.push("");
     lines.push(`Gate verdict: **${step.decision.allowed ? "ALLOWED" : "BLOCKED"}**, ${step.decision.reason}`);
     lines.push("");
-    lines.push("Simulate result:");
-    lines.push("");
-    lines.push("```json");
-    lines.push(JSON.stringify(step.decision.simulate, null, 2));
-    lines.push("```");
-    lines.push("");
     lines.push(`Policy result: ${JSON.stringify(step.decision.policy)}`);
+
+    if (step.decision.effectVerification) {
+      lines.push("");
+      lines.push(`Effect verification (verdict ${step.decision.effectVerification.verdict}):`);
+      lines.push("");
+      lines.push("```json");
+      lines.push(JSON.stringify(step.decision.effectVerification, null, 2));
+      lines.push("```");
+    }
+
+    if (step.decision.simulate) {
+      lines.push("");
+      lines.push("Simulate result:");
+      lines.push("");
+      lines.push("```json");
+      lines.push(JSON.stringify(step.decision.simulate, null, 2));
+      lines.push("```");
+    }
     lines.push("");
     lines.push(`Adaptation: ${step.adaptation}`);
 

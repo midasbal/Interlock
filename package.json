@@ -14,6 +14,8 @@
     "gate:token-revoke": "node --env-file=.env --import tsx agent/src/run-token-revoke.ts",
     "gate:contract-policy-block": "node --env-file=.env --import tsx agent/src/run-contract-policy-block.ts",
     "defense:approval-revoke": "node --env-file=.env --import tsx agent/src/run-outbound-approval-revoke.ts",
+    "gate:effect-match": "node --env-file=.env --import tsx agent/src/run-effect-verification-match.ts",
+    "gate:effect-mismatch": "node --env-file=.env --import tsx agent/src/run-effect-verification-mismatch.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

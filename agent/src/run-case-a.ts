@@ -1,17 +1,20 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
+import { EffectVerifier } from "./effectVerifier/verifier.js";
 import { appendDecision } from "./runlog.js";
 
 const WALLET_ADDRESS = "0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078";
 
 async function main() {
-  const gate = new Gate(new KeeperHubRestClient());
+  const gate = new Gate(new KeeperHubRestClient(), new EffectVerifier(WALLET_ADDRESS));
 
   const decision = await gate.run({
     kind: "transfer",
     chainId: "84532",
     to: WALLET_ADDRESS,
     valueEth: "0.0001",
+    declaredEffect: { kind: "nativeTransfer", recipient: WALLET_ADDRESS, amountWei: "100000000000000" },
+    watchlist: [],
   });
 
   appendDecision("Case A, compliant self-transfer", decision);

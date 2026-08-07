@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { evaluate, loadPolicy } from "../../policy/engine.js";
 import type { Policy, ProposedAction } from "../../policy/types.js";
+import type { EffectVerifier } from "./effectVerifier/verifier.js";
 import type { Executor } from "./executor.js";
 import type { ExecutionResult, KeeperHubClient } from "./keeperhub/types.js";
 import type { GateDecision } from "./types.js";
@@ -9,46 +10,75 @@ const POLL_INTERVAL_MS = 2000;
 const POLL_MAX_ATTEMPTS = 15;
 
 /**
- * The reusable safety gate: simulate, check policy, execute only if both pass.
- * No action reaches a signature unless simulate reports it would not revert
- * AND the declarative policy allows it. This is the only implementation of
- * Executor, and the only path in this codebase that holds a KeeperHub client.
- * Handles both native transfers and contract calls through the same checks.
+ * The reusable safety gate. Order, and the reason it is this order (cheapest
+ * and least ambiguous checks first, so a block happens as early as possible
+ * with a clear reason, see docs/ARCHITECTURE.md):
+ *   1. Policy (allowlist checks): purely local, instant, no network call.
+ *   2. Effect verification: does the real, observed effect of the exact call
+ *      match what its author declared, and does nothing watchlisted change.
+ *   3. Simulate: would the call revert on KeeperHub's own pre-flight check.
+ *   4. Execute, only if all three passed, with an idempotency key, polled to
+ *      on-chain confirmation.
+ * No action reaches a signature unless every stage passes. This is the only
+ * implementation of Executor, and the only path in this codebase that holds
+ * a KeeperHub client.
  */
 export class Gate implements Executor {
   constructor(
     private readonly client: KeeperHubClient,
+    private readonly effectVerifier: EffectVerifier,
     private readonly policy: Policy = loadPolicy()
   ) {}
 
   async run(action: ProposedAction): Promise<GateDecision> {
     const timestamp = new Date().toISOString();
 
+    const policy = evaluate(action, this.policy);
+    if (!policy.allowed) {
+      return {
+        action,
+        timestamp,
+        policy,
+        allowed: false,
+        reason: `policy blocked it: ${policy.reason}`,
+      };
+    }
+
+    const effectVerification = await this.effectVerifier.verify(action);
+    if (effectVerification.verdict !== "match") {
+      return {
+        action,
+        timestamp,
+        policy,
+        effectVerification,
+        allowed: false,
+        reason: `effect verification blocked it: ${effectVerification.deviations.join("; ")}`,
+      };
+    }
+
     const simulate = await this.simulate(action);
     const simulateOk = simulate.success === true && simulate.wouldRevert === false;
-
-    const policy = evaluate(action, this.policy);
-
-    const allowed = simulateOk && policy.allowed;
-    const reasonParts: string[] = [];
     if (!simulateOk) {
-      reasonParts.push(
-        `simulate blocked it: ${simulate.revertReason ?? "success was false or wouldRevert was true"}`
-      );
+      return {
+        action,
+        timestamp,
+        policy,
+        effectVerification,
+        simulate,
+        allowed: false,
+        reason: `simulate blocked it: ${simulate.revertReason ?? "success was false or wouldRevert was true"}`,
+      };
     }
-    if (!policy.allowed) {
-      reasonParts.push(`policy blocked it: ${policy.reason}`);
-    }
-    if (allowed) {
-      reasonParts.push("simulate passed and policy passed");
-    }
-    const reason = reasonParts.join("; ");
 
-    const decision: GateDecision = { action, timestamp, simulate, policy, allowed, reason };
-
-    if (!allowed) {
-      return decision;
-    }
+    const decision: GateDecision = {
+      action,
+      timestamp,
+      policy,
+      effectVerification,
+      simulate,
+      allowed: true,
+      reason: "policy passed, effect verification matched, simulate passed",
+    };
 
     const idempotencyKey = `interlock-gate-${randomUUID()}`;
     const execution = await this.execute(action, idempotencyKey);

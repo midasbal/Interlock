@@ -19,15 +19,35 @@ export function appendDecision(label: string, decision: GateDecision): void {
   lines.push("");
   lines.push(`Action: ${describeAction(decision.action)}`);
   lines.push("");
+  lines.push(`Declared effect: ${JSON.stringify(decision.action.declaredEffect)}`);
+  lines.push("");
   lines.push(`Verdict: **${decision.allowed ? "ALLOWED" : "BLOCKED"}**, ${decision.reason}`);
   lines.push("");
-  lines.push("Simulate result:");
-  lines.push("");
-  lines.push("```json");
-  lines.push(JSON.stringify(decision.simulate, null, 2));
-  lines.push("```");
-  lines.push("");
   lines.push(`Policy result: ${JSON.stringify(decision.policy)}`);
+
+  if (decision.effectVerification) {
+    lines.push("");
+    lines.push(`Effect verification (declared vs. observed, verdict ${decision.effectVerification.verdict}):`);
+    lines.push("");
+    lines.push("```json");
+    lines.push(JSON.stringify(decision.effectVerification, null, 2));
+    lines.push("```");
+  } else {
+    lines.push("");
+    lines.push("Effect verification: skipped, blocked at policy before reaching this stage.");
+  }
+
+  if (decision.simulate) {
+    lines.push("");
+    lines.push("Simulate result:");
+    lines.push("");
+    lines.push("```json");
+    lines.push(JSON.stringify(decision.simulate, null, 2));
+    lines.push("```");
+  } else {
+    lines.push("");
+    lines.push("Simulate: skipped, blocked at an earlier stage before reaching this stage.");
+  }
 
   if (decision.execution) {
     lines.push("");

@@ -1,4 +1,4 @@
-const BASE_SEPOLIA_RPC = "https://sepolia.base.org";
+import { rpcCall } from "../rpc/baseSepolia.js";
 
 // EIP-1967 implementation slot: bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1)
 export const EIP1967_IMPLEMENTATION_SLOT =
@@ -10,21 +10,12 @@ export const EIP1967_IMPLEMENTATION_SLOT =
  * written, see docs/RUNLOG.md.
  */
 export async function readImplementationSlot(proxyAddress: string): Promise<string> {
-  const response = await fetch(BASE_SEPOLIA_RPC, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "eth_getStorageAt",
-      params: [proxyAddress, EIP1967_IMPLEMENTATION_SLOT, "latest"],
-    }),
-  });
-  const body = (await response.json()) as { result?: string; error?: unknown };
-  if (body.error || !body.result) {
-    throw new Error(`eth_getStorageAt failed: ${JSON.stringify(body.error)}`);
-  }
-  return slotValueToAddress(body.result);
+  const result = await rpcCall<string>("eth_getStorageAt", [
+    proxyAddress,
+    EIP1967_IMPLEMENTATION_SLOT,
+    "latest",
+  ]);
+  return slotValueToAddress(result);
 }
 
 function slotValueToAddress(slotValue: string): string {

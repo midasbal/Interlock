@@ -1,5 +1,6 @@
 import { KeeperHubRestClient } from "./keeperhub/restClient.js";
 import { Gate } from "./gate.js";
+import { EffectVerifier } from "./effectVerifier/verifier.js";
 import { appendDecision } from "./runlog.js";
 
 // Circle's official USDC on Base Sepolia, confirmed live on 2026-08-08 by
@@ -15,7 +16,7 @@ const APPROVE_AMOUNT = "1000000"; // 1 USDC at 6 decimals
 
 async function main() {
   const client = new KeeperHubRestClient();
-  const gate = new Gate(client);
+  const gate = new Gate(client, new EffectVerifier(WALLET_ADDRESS));
 
   const decision = await gate.run({
     kind: "contractCall",
@@ -23,6 +24,14 @@ async function main() {
     contractAddress: USDC_TOKEN,
     functionName: "approve",
     functionArgs: [TEST_SPENDER, APPROVE_AMOUNT],
+    declaredEffect: {
+      kind: "erc20Approve",
+      token: USDC_TOKEN,
+      owner: WALLET_ADDRESS,
+      spender: TEST_SPENDER,
+      allowanceBecomes: APPROVE_AMOUNT,
+    },
+    watchlist: [],
   });
 
   appendDecision("token approve (grant), USDC via gate", decision);
