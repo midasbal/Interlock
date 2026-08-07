@@ -8,6 +8,8 @@
   "scripts": {
     "gate:case-a": "node --env-file=.env --import tsx agent/src/run-case-a.ts",
     "gate:case-b": "node --env-file=.env --import tsx agent/src/run-case-b.ts",
+    "agent:reliability-arc": "node --env-file=.env --import tsx agent/src/run-reliability-arc.ts",
+    "agent:containment-case": "node --env-file=.env --import tsx agent/src/run-containment-case.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

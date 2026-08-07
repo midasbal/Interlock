@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { evaluate, loadPolicy } from "../../policy/engine.js";
 import type { Policy, ProposedAction } from "../../policy/types.js";
+import type { Executor } from "./executor.js";
 import type { KeeperHubClient } from "./keeperhub/types.js";
 import type { GateDecision } from "./types.js";
 
@@ -10,9 +11,10 @@ const POLL_MAX_ATTEMPTS = 15;
 /**
  * The reusable safety gate: simulate, check policy, execute only if both pass.
  * No action reaches a signature unless simulate reports it would not revert
- * AND the declarative policy allows it.
+ * AND the declarative policy allows it. This is the only implementation of
+ * Executor, and the only path in this codebase that holds a KeeperHub client.
  */
-export class Gate {
+export class Gate implements Executor {
   constructor(
     private readonly client: KeeperHubClient,
     private readonly policy: Policy = loadPolicy()
