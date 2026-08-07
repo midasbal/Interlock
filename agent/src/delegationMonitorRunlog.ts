@@ -2,6 +2,7 @@ import { appendFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import type { DelegationMonitorEvent } from "./delegationMonitor/monitor.js";
+import { appendEntry } from "./auditTrail/chain.js";
 
 const RUNLOG_PATH = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -12,6 +13,8 @@ const RUNLOG_PATH = join(
 );
 
 export function appendDelegationMonitorEvent(label: string, event: DelegationMonitorEvent): void {
+  appendEntry("delegation-monitor-event", { label, event });
+
   const lines: string[] = [];
   lines.push("");
   lines.push(`### ${event.timestamp}: delegation monitor, ${label}, ${event.kind}`);
@@ -24,5 +27,6 @@ export function appendDelegationMonitorEvent(label: string, event: DelegationMon
 }
 
 export function appendNote(heading: string, note: string): void {
+  appendEntry("note", { heading, note });
   appendFileSync(RUNLOG_PATH, `\n## ${heading}\n\n${note}\n`);
 }

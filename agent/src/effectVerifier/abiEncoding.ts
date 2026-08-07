@@ -23,3 +23,17 @@ export function encodeAllowanceCalldata(owner: string, spender: string): string 
 export function decodeUint256(hex: string): bigint {
   return BigInt(hex);
 }
+
+export function encodeBytes32(value: string): string {
+  return padLeft(value);
+}
+
+// anchor(bytes32) selector, confirmed live with cast sig, keccak256("anchor(bytes32)")[:4]
+export function encodeAnchorCalldata(digest: string): string {
+  return `0xeecdf927${encodeBytes32(digest)}`;
+}
+
+// lastDigest(address) selector, confirmed live with cast sig, keccak256("lastDigest(address)")[:4]
+export function encodeLastDigestCalldata(committer: string): string {
+  return `0x8dd8c307${encodeAddress(committer)}`;
+}

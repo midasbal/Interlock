@@ -67,6 +67,7 @@ export class KeeperHubRestClient implements KeeperHubClient {
       functionName: request.functionName,
       functionArgs: JSON.stringify(request.functionArgs),
       value: request.value,
+      abi: request.abi,
       simulate: true,
     });
   }
@@ -80,6 +81,7 @@ export class KeeperHubRestClient implements KeeperHubClient {
         functionName: request.functionName,
         functionArgs: JSON.stringify(request.functionArgs),
         value: request.value,
+        abi: request.abi,
       },
       request.idempotencyKey
     );

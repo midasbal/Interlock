@@ -3,7 +3,10 @@
   "recipientAllowlist": ["0x4F6bE888cF5A55D9FaF2C9625BfA16AbF703c078"],
   "maxValueEth": "0.02",
   "contractCall": {
-    "targetAllowlist": ["0x036CbD53842c5426634e7929541eC2318f3dCF7e"],
-    "functionAllowlist": ["approve"]
+    "targetAllowlist": [
+      "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "0x0dDD39Da7c5f7DFe263cEE4866d1525895371E90"
+    ],
+    "functionAllowlist": ["approve", "anchor"]
   }
 }

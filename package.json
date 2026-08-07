@@ -17,6 +17,9 @@
     "gate:effect-match": "node --env-file=.env --import tsx agent/src/run-effect-verification-match.ts",
     "gate:effect-mismatch": "node --env-file=.env --import tsx agent/src/run-effect-verification-mismatch.ts",
     "defense:delegation-monitor": "node --env-file=.env --import tsx agent/src/run-delegation-monitor.ts",
+    "audit:verify": "node --env-file=.env --import tsx agent/src/audit-verify.ts",
+    "audit:anchor": "node --env-file=.env --import tsx agent/src/run-audit-anchor.ts",
+    "test": "node --env-file=.env --import tsx --test agent/src/test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

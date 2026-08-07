@@ -17,7 +17,8 @@ export interface Policy {
  */
 export type DeclaredEffect =
   | { kind: "nativeTransfer"; recipient: string; amountWei: string }
-  | { kind: "erc20Approve"; token: string; owner: string; spender: string; allowanceBecomes: string };
+  | { kind: "erc20Approve"; token: string; owner: string; spender: string; allowanceBecomes: string }
+  | { kind: "auditAnchor"; contract: string; committer: string; digest: string };
 
 /**
  * A sensitive invariant that must not change as a side effect of the
@@ -45,6 +46,8 @@ export interface ContractCallAction {
   contractAddress: string;
   functionName: string;
   functionArgs: unknown[];
+  /** Explicit ABI, required for contracts KeeperHub cannot auto-fetch (unverified on the block explorer). */
+  abi?: string;
   declaredEffect: DeclaredEffect;
   watchlist: WatchedInvariant[];
 }

@@ -13,6 +13,7 @@ export interface ContractCallRequest {
   functionName: string;
   functionArgs: unknown[];
   value?: string;
+  abi?: string;
   idempotencyKey?: string;
   simulate?: boolean;
 }

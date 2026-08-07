@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import type { AgentRunResult } from "./selfGateAgent.js";
 import { describeAction } from "./describeAction.js";
+import { appendEntry } from "./auditTrail/chain.js";
 
 const RUNLOG_PATH = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -13,6 +14,8 @@ const RUNLOG_PATH = join(
 );
 
 export function appendAgentRun(label: string, run: AgentRunResult): void {
+  appendEntry("agent-run", { label, run });
+
   const lines: string[] = [];
   lines.push("");
   lines.push(`## ${new Date().toISOString()}: self-gate agent run, ${label}`);

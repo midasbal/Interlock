@@ -135,6 +135,7 @@ export class Gate implements Executor {
       contractAddress: action.contractAddress,
       functionName: action.functionName,
       functionArgs: action.functionArgs,
+      abi: action.abi,
     });
   }
 
@@ -152,6 +153,7 @@ export class Gate implements Executor {
       contractAddress: action.contractAddress,
       functionName: action.functionName,
       functionArgs: action.functionArgs,
+      abi: action.abi,
       idempotencyKey,
     });
   }

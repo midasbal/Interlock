@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import type { GateDecision } from "./types.js";
 import { describeAction } from "./describeAction.js";
+import { appendEntry } from "./auditTrail/chain.js";
 
 const RUNLOG_PATH = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -13,6 +14,8 @@ const RUNLOG_PATH = join(
 );
 
 export function appendDecision(label: string, decision: GateDecision): void {
+  appendEntry("gate-decision", { label, decision });
+
   const lines: string[] = [];
   lines.push("");
   lines.push(`## ${decision.timestamp}: gate decision, ${label}`);

@@ -1,5 +1,11 @@
 import { rpcCall } from "../rpc/baseSepolia.js";
-import { decodeUint256, encodeAllowanceCalldata, encodeApproveCalldata } from "./abiEncoding.js";
+import {
+  decodeUint256,
+  encodeAllowanceCalldata,
+  encodeAnchorCalldata,
+  encodeApproveCalldata,
+  encodeLastDigestCalldata,
+} from "./abiEncoding.js";
 import { readWithStateOverride, traceCallStateDiff, type StateDiffResult } from "./stateDiff.js";
 import { ethStringToWei } from "./units.js";
 import type { DeclaredEffect, ProposedAction, WatchedInvariant } from "../../../policy/types.js";
@@ -122,6 +128,45 @@ export class EffectVerifier {
       }
 
       this.checkUndeclaredAccounts(diff, [tokenKey, this.walletAddress.toLowerCase()], deviations);
+      this.checkWatchlist(action.watchlist, watchBefore, diff, deviations);
+
+      return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations };
+    }
+
+    if (declared.kind === "auditAnchor" && action.kind === "contractCall") {
+      if (action.functionName !== "anchor") {
+        throw new Error(`auditAnchor declared effect requires functionName "anchor", got "${action.functionName}"`);
+      }
+      const [actualDigest] = action.functionArgs as [string];
+      const callData = encodeAnchorCalldata(actualDigest);
+
+      const diff = await traceCallStateDiff({
+        from: this.walletAddress,
+        to: action.contractAddress,
+        data: callData,
+      });
+
+      const contractKey = declared.contract.toLowerCase();
+      const storageDiff = diff.post[contractKey]?.storage ?? {};
+
+      const afterHex = await readWithStateOverride(
+        {
+          from: this.walletAddress,
+          to: declared.contract,
+          data: encodeLastDigestCalldata(declared.committer),
+        },
+        declared.contract,
+        storageDiff
+      );
+      observed.lastDigestAfter = afterHex;
+
+      if (afterHex.toLowerCase() !== declared.digest.toLowerCase()) {
+        deviations.push(
+          `lastDigest(${declared.committer}) on ${declared.contract} became ${afterHex}, declared effect said it becomes ${declared.digest}`
+        );
+      }
+
+      this.checkUndeclaredAccounts(diff, [contractKey, this.walletAddress.toLowerCase()], deviations);
       this.checkWatchlist(action.watchlist, watchBefore, diff, deviations);
 
       return { verdict: deviations.length === 0 ? "match" : "mismatch", declared, observed, deviations };
