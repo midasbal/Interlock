@@ -39,6 +39,11 @@ function readEntries(path: string = CHAIN_PATH): AuditEntry[] {
     .map((line) => JSON.parse(line) as AuditEntry);
 }
 
+/** Reads every entry currently in the chain, in order. Used by anything that needs to reason over past entries, e.g. the reconciler. */
+export function readChain(path: string = CHAIN_PATH): AuditEntry[] {
+  return readEntries(path);
+}
+
 function lastHash(entries: AuditEntry[]): string {
   return entries.length > 0 ? entries[entries.length - 1].hash : GENESIS_HASH;
 }

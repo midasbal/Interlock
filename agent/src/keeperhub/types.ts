@@ -58,6 +58,8 @@ export interface ExecutionStatus {
     receiptStatus: string;
   }>;
   error?: string | null;
+  createdAt?: string;
+  completedAt?: string;
 }
 
 export interface KeeperHubClient {
