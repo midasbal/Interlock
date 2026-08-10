@@ -31,5 +31,5 @@
 
 .route-log__unknown pre {
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }

@@ -20,6 +20,23 @@ export function declaredEffectKindLabel(kind: DeclaredEffect["kind"]): string {
   }
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  amountWei: "Amount",
+  senderDeltaWei: "Sender delta",
+  recipientDeltaWei: "Recipient delta",
+  allowanceBecomes: "Allowance becomes",
+  allowanceAfter: "Allowance after",
+  lastDigestAfter: "Last digest after",
+  keyedDigestAfter: "Keyed digest after",
+};
+
+export function humanizeFieldLabel(key: string): string {
+  if (FIELD_LABELS[key]) return FIELD_LABELS[key];
+  return key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
 export function declaredEffectFields(effect: DeclaredEffect): Array<[string, string]> {
   switch (effect.kind) {
     case "nativeTransfer":

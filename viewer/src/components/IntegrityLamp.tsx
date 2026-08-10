@@ -1,5 +1,5 @@
 import type { ChainVerificationResult } from "../lib/hashChain";
-import { truncateHex } from "../lib/format";
+import { truncateForDisplay } from "../lib/format";
 import { LampDot } from "./icons";
 import "./IntegrityLamp.css";
 
@@ -50,8 +50,8 @@ export function IntegrityLamp({ phase, integrity, errorMessage }: Props) {
         </span>
         <div className="lamp__text">
           <span className="lamp__label">Chain intact</span>
-          <span className="lamp__detail mono-num">
-            {integrity.entryCount} entries · head {truncateHex(integrity.chainHead, 8, 6)}
+          <span className="lamp__detail mono-num" title={integrity.chainHead}>
+            {integrity.entryCount} entries · head {truncateForDisplay(integrity.chainHead)}
           </span>
         </div>
       </div>

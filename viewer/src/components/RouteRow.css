@@ -146,7 +146,6 @@
   font-size: var(--fs-sm);
   color: var(--ivory-muted);
   overflow-wrap: break-word;
-  word-break: break-word;
 }
 
 .route-row__reason--anomaly {

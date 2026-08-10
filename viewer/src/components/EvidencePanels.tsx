@@ -1,4 +1,4 @@
-import { declaredEffectFields, declaredEffectKindLabel } from "../lib/describe";
+import { declaredEffectFields, declaredEffectKindLabel, humanizeFieldLabel } from "../lib/describe";
 import { weiToEth } from "../lib/format";
 import type {
   EffectVerificationResult,
@@ -60,7 +60,7 @@ export function EffectPanel({ effect }: { effect: EffectVerificationResult }) {
       <DataFieldGrid>
         {declaredEffectFields(effect.declared).map(([key, value]) => (
           <div className="data-field" key={key}>
-            <span className="data-field__label">{key}</span>
+            <span className="data-field__label">{humanizeFieldLabel(key)}</span>
             <span className="data-field__value">{renderFieldValue(key, value)}</span>
           </div>
         ))}
@@ -71,7 +71,7 @@ export function EffectPanel({ effect }: { effect: EffectVerificationResult }) {
           <DataFieldGrid>
             {Object.entries(effect.observed).map(([key, value]) => (
               <div className="data-field" key={key}>
-                <span className="data-field__label">{key}</span>
+                <span className="data-field__label">{humanizeFieldLabel(key)}</span>
                 <span className="data-field__value">{renderFieldValue(key, value)}</span>
               </div>
             ))}
@@ -135,7 +135,15 @@ export function SimulatePanel({ simulate }: { simulate: SimulateResult }) {
   );
 }
 
-export function ExecutionPanel({ execution, finalStatus }: { execution: ExecutionRef; finalStatus?: FinalStatus }) {
+export function ExecutionPanel({
+  execution,
+  finalStatus,
+  statusDivergenceNote,
+}: {
+  execution: ExecutionRef;
+  finalStatus?: FinalStatus;
+  statusDivergenceNote?: string;
+}) {
   const status = finalStatus?.status ?? execution.status;
   const hash = finalStatus?.transactionHash ?? execution.transactionHash;
   return (
@@ -143,7 +151,7 @@ export function ExecutionPanel({ execution, finalStatus }: { execution: Executio
       <DataFieldGrid>
         <DataField label="Execution id" value={execution.executionId} />
         <div className="data-field">
-          <span className="data-field__label">Status</span>
+          <span className="data-field__label">Status (KeeperHub reported)</span>
           <span className="data-field__value">{status}</span>
         </div>
         {hash ? (
@@ -155,6 +163,11 @@ export function ExecutionPanel({ execution, finalStatus }: { execution: Executio
           </div>
         ) : null}
       </DataFieldGrid>
+      {statusDivergenceNote ? (
+        <p className="evidence-reason evidence-reason--note">
+          <HexText text={statusDivergenceNote} />. The chain is the source of truth: this landed successfully.
+        </p>
+      ) : null}
     </EvidenceSection>
   );
 }

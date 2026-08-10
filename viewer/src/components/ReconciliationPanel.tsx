@@ -1,8 +1,7 @@
-import { explorerTxUrl } from "../lib/format";
 import type { ReconciliationItemPayload } from "../lib/types";
 import { HashValue } from "./HashValue";
 import { HexText } from "./HexText";
-import { AnomalyMarkIcon, ExternalLinkIcon } from "./icons";
+import { AnomalyMarkIcon } from "./icons";
 import "./ReconciliationPanel.css";
 
 const DIVERGENCE_TITLE: Record<string, string> = {
@@ -70,17 +69,9 @@ export function ReconciliationPanel({ item }: { item: ReconciliationItemPayload 
           <ul className="reconciliation-matches">
             {item.onChain.exactMatches.map((match) => (
               <li key={match.hash} className={`reconciliation-match reconciliation-match--${match.status}`}>
-                <a
-                  className="reconciliation-match__hash"
-                  href={explorerTxUrl(match.hash)}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <span className="mono-num">
-                    {match.hash.slice(0, 10)}…{match.hash.slice(-6)}
-                  </span>
-                  <ExternalLinkIcon />
-                </a>
+                <span className="reconciliation-match__hash">
+                  <HashValue value={match.hash} kind="tx" linkToExplorer />
+                </span>
                 <span className="reconciliation-match__meta">
                   block <span className="mono-num">{match.blockNumber}</span> · {match.path} · {match.status}
                 </span>
@@ -114,6 +105,12 @@ export function ReconciliationPanel({ item }: { item: ReconciliationItemPayload 
               <span className="reconciliation-field__label">Receipt status</span>
               <span className="reconciliation-field__value">{item.keeperHubReported.receiptStatus}</span>
             </div>
+            {item.keeperHubReported.status !== item.keeperHubReported.receiptStatus ? (
+              <p className="reconciliation-column__note">
+                KeeperHub's own fields disagree: it reported status "{item.keeperHubReported.status}" for this
+                execution while its own receipt records "{item.keeperHubReported.receiptStatus}".
+              </p>
+            ) : null}
             {item.keeperHubReported.error ? (
               <div className="reconciliation-field">
                 <span className="reconciliation-field__label">Error</span>

@@ -38,6 +38,6 @@
   font-size: var(--fs-xs);
   color: var(--ivory-muted);
   white-space: pre-wrap;
-  word-break: break-word;
+  overflow-wrap: break-word;
   line-height: 1.7;
 }

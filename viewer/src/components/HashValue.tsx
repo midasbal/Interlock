@@ -1,4 +1,4 @@
-import { explorerTxUrl, truncateAddress, truncateTxHash } from "../lib/format";
+import { explorerTxUrl, truncateForDisplay } from "../lib/format";
 import { ExternalLinkIcon } from "./icons";
 import "./HashValue.css";
 
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function HashValue({ value, kind, linkToExplorer }: Props) {
-  const truncated = kind === "tx" ? truncateTxHash(value) : truncateAddress(value);
+  const truncated = truncateForDisplay(value);
 
   if (linkToExplorer && kind === "tx") {
     return (

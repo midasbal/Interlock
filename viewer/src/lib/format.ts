@@ -11,6 +11,17 @@ export function truncateTxHash(value: string): string {
   return truncateHex(value, 10, 8);
 }
 
+/**
+ * Single source of truth for hex truncation everywhere in the viewer: a
+ * 20-byte address always reads 6/4, anything longer (a tx hash, a storage
+ * slot, a digest) always reads 10/8, regardless of which component renders
+ * it or where in the page it appears.
+ */
+export function truncateForDisplay(value: string): string {
+  const isAddress = /^0x[0-9a-fA-F]{40}$/.test(value);
+  return isAddress ? truncateAddress(value) : truncateTxHash(value);
+}
+
 export function weiToEth(wei: string): string {
   try {
     const value = BigInt(wei);

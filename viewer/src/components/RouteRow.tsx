@@ -25,6 +25,7 @@ export function RouteRow({ seq, label, decision, reconciliationItem, reducedMoti
   const state = signalState(decision);
   const stages = computeStages(decision);
   const hasAnomaly = Boolean(reconciliationItem);
+  const statusDivergence = reconciliationItem?.divergences.find((d) => d.type === "status-divergence");
 
   const toggle = () => {
     const next = !expanded;
@@ -93,7 +94,11 @@ export function RouteRow({ seq, label, decision, reconciliationItem, reducedMoti
             {decision.invariants ? <InvariantPanel invariants={decision.invariants} /> : null}
             {decision.simulate ? <SimulatePanel simulate={decision.simulate} /> : null}
             {decision.execution ? (
-              <ExecutionPanel execution={decision.execution} finalStatus={decision.finalStatus} />
+              <ExecutionPanel
+                execution={decision.execution}
+                finalStatus={decision.finalStatus}
+                statusDivergenceNote={statusDivergence?.detail}
+              />
             ) : null}
           </div>
         </div>

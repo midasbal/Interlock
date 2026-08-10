@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { truncateHex } from "../lib/format";
+import { truncateForDisplay } from "../lib/format";
 import "./HexText.css";
 
 const HEX_RUN = /0x[0-9a-fA-F]{8,}/g;
@@ -26,7 +26,7 @@ export function HexText({ text }: { text: string }) {
     if (value.length > 18) {
       parts.push(
         <span className="hex-inline mono-num" title={value} key={key++}>
-          {truncateHex(value, 8, 6)}
+          {truncateForDisplay(value)}
         </span>
       );
     } else {
