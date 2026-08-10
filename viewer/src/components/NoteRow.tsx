@@ -1,4 +1,5 @@
 import { formatTimeOnly } from "../lib/format";
+import { HexText } from "./HexText";
 import "./NoteRow.css";
 
 export function NoteRow({ seq, heading, note, timestamp }: { seq: number; heading: string; note: string; timestamp: string }) {
@@ -10,7 +11,9 @@ export function NoteRow({ seq, heading, note, timestamp }: { seq: number; headin
         <span className="note-row__kind">Operator note</span>
       </div>
       <h4 className="note-row__heading">{heading}</h4>
-      <pre className="note-row__body">{note}</pre>
+      <pre className="note-row__body">
+        <HexText text={note} />
+      </pre>
     </article>
   );
 }

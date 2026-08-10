@@ -42,7 +42,12 @@ export function StageTrack({ stages, frozen, variant, traveling, clearedToChain 
             } ${stage.status === "latched" ? "stage-track__node--latch" : ""}`}
             title={`${stage.label}: ${statusText(stage.status)}`}
           >
-            {variant === "full" ? <span className="stage-track__node-label">{stage.label}</span> : null}
+            {variant === "full" ? (
+              <span className="stage-track__node-inner">
+                <span className="stage-track__node-label">{stage.label}</span>
+                {stage.status === "latched" ? <span className="stage-track__node-stopped">Stopped here</span> : null}
+              </span>
+            ) : null}
           </div>
         </div>
       ))}

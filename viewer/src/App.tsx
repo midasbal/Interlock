@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { InstrumentHeader } from "./components/InstrumentHeader";
+import { OverviewSection } from "./components/OverviewSection";
+import { HowItWorksSection } from "./components/HowItWorksSection";
 import { RouteLog } from "./components/RouteLog";
+import { SiteFooter } from "./components/SiteFooter";
+import { SiteNav } from "./components/SiteNav";
 import { useReducedMotion } from "./hooks/useReducedMotion";
 import { useTrail } from "./hooks/useTrail";
 import { buildReconciliationIndex } from "./lib/reconciliation";
@@ -41,31 +45,34 @@ export default function App() {
   );
 
   return (
-    <div className="app">
-      <InstrumentHeader
-        phase={trail.phase}
-        integrity={trail.integrity}
-        errorMessage={trail.error}
-        summary={summary}
-        revealed={headerRevealed}
-      />
-      <main className="app__body">
-        {trail.phase === "error" ? (
-          <div className="app__error">
-            <p>{trail.error}</p>
-          </div>
-        ) : (
-          <RouteLog
-            entries={trail.entries}
-            reconciliationIndex={reconciliationIndex}
-            revealed={revealed}
-            reducedMotion={reducedMotion}
-          />
-        )}
-      </main>
-      <footer className="app__footer">
-        <span>Interlock audit-trail viewer. Renders docs/audit-trail.jsonl only, no fabricated data.</span>
-      </footer>
+    <div className="app" id="top">
+      <SiteNav />
+      <OverviewSection />
+      <HowItWorksSection />
+      <section className="signal-panel-section" id="signal-panel" aria-label="Signal panel">
+        <InstrumentHeader
+          phase={trail.phase}
+          integrity={trail.integrity}
+          errorMessage={trail.error}
+          summary={summary}
+          revealed={headerRevealed}
+        />
+        <main className="app__body shell">
+          {trail.phase === "error" ? (
+            <div className="app__error">
+              <p>{trail.error}</p>
+            </div>
+          ) : (
+            <RouteLog
+              entries={trail.entries}
+              reconciliationIndex={reconciliationIndex}
+              revealed={revealed}
+              reducedMotion={reducedMotion}
+            />
+          )}
+        </main>
+      </section>
+      <SiteFooter />
     </div>
   );
 }

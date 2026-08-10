@@ -22,15 +22,17 @@
 
 .readout--clear .readout__value {
   color: var(--clear);
+  text-shadow: 0 0 12px rgb(95 163 122 / 35%);
 }
 
 .readout--danger .readout__value {
   color: var(--danger);
+  text-shadow: 0 0 12px rgb(193 84 58 / 35%);
 }
 
 .readout--anomaly .readout__value {
   color: var(--anomaly);
-  text-shadow: 0 0 14px rgb(155 123 212 / 40%);
+  text-shadow: 0 0 14px rgb(155 123 212 / 45%);
 }
 
 .readout__label {

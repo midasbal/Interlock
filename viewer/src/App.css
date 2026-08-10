@@ -4,31 +4,21 @@
   flex-direction: column;
 }
 
-.app__body {
+.signal-panel-section {
   flex: 1;
-  max-width: 1180px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 var(--space-6) var(--space-7);
+  display: flex;
+  flex-direction: column;
 }
 
-@media (max-width: 720px) {
-  .app__body {
-    padding: 0 0 var(--space-6);
-  }
+.app__body {
+  flex: 1;
+  width: 100%;
+  padding-bottom: var(--space-7);
 }
 
 .app__error {
-  padding: var(--space-6);
+  padding: var(--space-6) 0;
   color: var(--danger);
   font-size: var(--fs-sm);
   max-width: 60ch;
-}
-
-.app__footer {
-  padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--hairline);
-  font-size: var(--fs-2xs);
-  color: var(--ivory-faint);
-  text-align: center;
 }

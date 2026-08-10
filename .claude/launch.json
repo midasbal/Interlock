@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "dev", "--", "--host"],
       "cwd": "viewer",
       "port": 5173
+    },
+    {
+      "name": "viewer-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--", "--host", "--port", "4173"],
+      "cwd": "viewer",
+      "port": 4173
     }
   ]
 }

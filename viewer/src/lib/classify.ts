@@ -23,44 +23,48 @@ export const STAGE_ORDER: { name: StageName; label: string }[] = [
  * only runs if every earlier stage passed. A stage present in the decision
  * with a failing verdict is where the route latches, every later stage
  * never ran and is rendered not-reached, never as a second failure.
+ *
+ * The invariant stage did not exist for the earliest entries in the trail,
+ * so its field is absent there, not because the route stopped before it.
+ * An absent field on a decision that is not otherwise latched never blocked
+ * the route, so it renders passed rather than as a false break in an
+ * otherwise-clearing chain.
  */
 export function computeStages(decision: GateDecision): StageStatus[] {
-  const stages: StageStatus[] = [];
-  let latched = false;
-
-  const push = (name: StageName, label: string, passed: boolean) => {
-    stages.push({ name, label, status: latched ? "not-reached" : passed ? "passed" : "latched" });
-    if (!passed) latched = true;
-  };
-
   if (decision.frozen) {
     return STAGE_ORDER.map((s) => ({ ...s, status: "not-reached" as const }));
   }
 
-  if (decision.policy) {
-    push("policy", "Policy", decision.policy.allowed);
-  } else {
-    stages.push({ name: "policy", label: "Policy", status: "not-reached" });
-    latched = true;
-  }
+  const stages: StageStatus[] = [];
+  let latched = false;
 
-  if (decision.effectVerification) {
-    push("effect", "Effect verification", decision.effectVerification.verdict === "match");
-  } else {
-    stages.push({ name: "effect", label: "Effect verification", status: "not-reached" });
-  }
+  const addStage = (name: StageName, label: string, present: boolean, passed: boolean) => {
+    let status: StageStatus["status"];
+    if (latched) {
+      status = "not-reached";
+    } else if (!present) {
+      status = "passed";
+    } else {
+      status = passed ? "passed" : "latched";
+      if (!passed) latched = true;
+    }
+    stages.push({ name, label, status });
+  };
 
-  if (decision.invariants) {
-    push("invariant", "Invariant", decision.invariants.verdict === "pass");
-  } else {
-    stages.push({ name: "invariant", label: "Invariant", status: "not-reached" });
-  }
-
-  if (decision.simulate) {
-    push("simulate", "Simulate", decision.simulate.success === true && decision.simulate.wouldRevert === false);
-  } else {
-    stages.push({ name: "simulate", label: "Simulate", status: "not-reached" });
-  }
+  addStage("policy", "Policy", Boolean(decision.policy), decision.policy?.allowed === true);
+  addStage(
+    "effect",
+    "Effect verification",
+    Boolean(decision.effectVerification),
+    decision.effectVerification?.verdict === "match"
+  );
+  addStage("invariant", "Invariant", Boolean(decision.invariants), decision.invariants?.verdict === "pass");
+  addStage(
+    "simulate",
+    "Simulate",
+    Boolean(decision.simulate),
+    decision.simulate?.success === true && decision.simulate?.wouldRevert === false
+  );
 
   const executed = decision.allowed === true && Boolean(decision.execution);
   stages.push({ name: "execute", label: "Execute", status: latched ? "not-reached" : executed ? "passed" : "latched" });

@@ -10,6 +10,7 @@ import type {
 } from "../lib/types";
 import { DataField, DataFieldGrid } from "./DataField";
 import { HashValue } from "./HashValue";
+import { HexText } from "./HexText";
 import "./EvidencePanels.css";
 
 function isAddressLike(key: string, value: string): boolean {
@@ -20,9 +21,14 @@ function isWeiLike(key: string): boolean {
   return /wei/i.test(key);
 }
 
+function isLongHex(value: string): boolean {
+  return /^0x[0-9a-fA-F]{8,}$/.test(value) && value.length > 18;
+}
+
 function renderFieldValue(key: string, value: string) {
   if (isAddressLike(key, value)) return <HashValue value={value} kind="address" />;
   if (isWeiLike(key)) return <span className="mono-num">{weiToEth(value)}</span>;
+  if (isLongHex(value)) return <HashValue value={value} kind="address" />;
   return <span className="mono-num">{value}</span>;
 }
 
@@ -38,7 +44,9 @@ export function EvidenceSection({ title, tone, children }: { title: string; tone
 export function PolicyPanel({ policy }: { policy: PolicyDecision }) {
   return (
     <EvidenceSection title="Policy" tone={policy.allowed ? "clear" : "danger"}>
-      <p className="evidence-reason">{policy.reason}</p>
+      <p className="evidence-reason">
+        <HexText text={policy.reason} />
+      </p>
     </EvidenceSection>
   );
 }
@@ -73,7 +81,9 @@ export function EffectPanel({ effect }: { effect: EffectVerificationResult }) {
       {effect.deviations.length > 0 ? (
         <ul className="evidence-list evidence-list--danger">
           {effect.deviations.map((d, i) => (
-            <li key={i}>{d}</li>
+            <li key={i}>
+              <HexText text={d} />
+            </li>
           ))}
         </ul>
       ) : null}
@@ -97,7 +107,9 @@ export function InvariantPanel({ invariants }: { invariants: InvariantEvaluation
             <tr key={check.name} className={check.passed ? "" : "evidence-table__row--danger"}>
               <td>{check.name}</td>
               <td>{check.passed ? "held" : "breached"}</td>
-              <td>{check.detail}</td>
+              <td>
+                <HexText text={check.detail} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -116,7 +128,7 @@ export function SimulatePanel({ simulate }: { simulate: SimulateResult }) {
         </DataFieldGrid>
       ) : (
         <p className="evidence-reason evidence-reason--danger">
-          {simulate.revertReason ?? simulate.error ?? "Simulate reported it would revert."}
+          <HexText text={simulate.revertReason ?? simulate.error ?? "Simulate reported it would revert."} />
         </p>
       )}
     </EvidenceSection>

@@ -3,10 +3,11 @@ import { computeStages, signalState } from "../lib/classify";
 import { describeAction } from "../lib/describe";
 import { formatTimeOnly } from "../lib/format";
 import type { GateDecision, ReconciliationItemPayload } from "../lib/types";
-import { ChevronIcon, LampDot } from "./icons";
+import { AnomalyMarkIcon, ChevronIcon, LampDot } from "./icons";
 import { StageTrack } from "./StageTrack";
 import { EffectPanel, ExecutionPanel, InvariantPanel, PolicyPanel, SimulatePanel } from "./EvidencePanels";
 import { ReconciliationPanel } from "./ReconciliationPanel";
+import { HexText } from "./HexText";
 import "./RouteRow.css";
 
 interface Props {
@@ -52,7 +53,12 @@ export function RouteRow({ seq, label, decision, reconciliationItem, reducedMoti
         <span className="route-row__track">
           <StageTrack stages={stages} frozen={decision.frozen} variant="compact" />
         </span>
-        {hasAnomaly ? <span className="route-row__anomaly-badge">Divergence</span> : null}
+        {hasAnomaly ? (
+          <span className="route-row__anomaly-badge">
+            <AnomalyMarkIcon size={11} />
+            Divergence
+          </span>
+        ) : null}
         <span className={`route-row__state route-row__state--${state}`}>{stateLabel(state)}</span>
         <span className="route-row__chevron">
           <ChevronIcon open={expanded} />
@@ -61,7 +67,9 @@ export function RouteRow({ seq, label, decision, reconciliationItem, reducedMoti
 
       {expanded ? (
         <div className="route-row__detail" id={`route-detail-${seq}`}>
-          <p className="route-row__action">{describeAction(decision.action)}</p>
+          <p className="route-row__action">
+            <HexText text={describeAction(decision.action)} />
+          </p>
 
           <StageTrack
             stages={stages}
@@ -72,8 +80,12 @@ export function RouteRow({ seq, label, decision, reconciliationItem, reducedMoti
           />
 
           {decision.frozen ? (
-            <div className="route-row__reason route-row__reason--anomaly">{decision.reason}</div>
+            <div className="route-row__reason route-row__reason--anomaly">
+              <HexText text={decision.reason} />
+            </div>
           ) : null}
+
+          {reconciliationItem ? <ReconciliationPanel item={reconciliationItem} /> : null}
 
           <div className="route-row__evidence">
             {decision.policy ? <PolicyPanel policy={decision.policy} /> : null}
@@ -84,8 +96,6 @@ export function RouteRow({ seq, label, decision, reconciliationItem, reducedMoti
               <ExecutionPanel execution={decision.execution} finalStatus={decision.finalStatus} />
             ) : null}
           </div>
-
-          {reconciliationItem ? <ReconciliationPanel item={reconciliationItem} /> : null}
         </div>
       ) : null}
     </article>

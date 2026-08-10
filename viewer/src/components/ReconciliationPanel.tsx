@@ -1,14 +1,29 @@
 import { explorerTxUrl } from "../lib/format";
 import type { ReconciliationItemPayload } from "../lib/types";
 import { HashValue } from "./HashValue";
-import { ExternalLinkIcon } from "./icons";
+import { HexText } from "./HexText";
+import { AnomalyMarkIcon, ExternalLinkIcon } from "./icons";
 import "./ReconciliationPanel.css";
+
+const DIVERGENCE_TITLE: Record<string, string> = {
+  "duplicate-broadcast": "Duplicate broadcast",
+  "status-divergence": "False status reported",
+  "amount-or-recipient-mismatch": "Amount or recipient mismatch",
+  "unmatched-authorization": "No on-chain match found",
+};
+
+function divergenceTitle(type: string): string {
+  return DIVERGENCE_TITLE[type] ?? type;
+}
 
 export function ReconciliationPanel({ item }: { item: ReconciliationItemPayload }) {
   return (
     <section className="reconciliation-panel" aria-label="Reconciliation occupancy anomaly">
       <div className="reconciliation-panel__head">
-        <span className="reconciliation-panel__badge">Occupancy anomaly</span>
+        <span className="reconciliation-panel__badge">
+          <AnomalyMarkIcon />
+          Occupancy anomaly, the headline finding
+        </span>
         <p className="reconciliation-panel__intro">
           Independently rebuilt from real Base Sepolia reads and a live KeeperHub status check, blocks{" "}
           <span className="mono-num">
@@ -18,21 +33,36 @@ export function ReconciliationPanel({ item }: { item: ReconciliationItemPayload 
         </p>
       </div>
 
+      <div className="reconciliation-panel__findings">
+        {item.divergences.map((d, i) => (
+          <div className="reconciliation-finding" key={i}>
+            <span className="reconciliation-finding__title">{divergenceTitle(d.type)}</span>
+            <p className="reconciliation-finding__detail">
+              <HexText text={d.detail} />
+            </p>
+          </div>
+        ))}
+      </div>
+
       <div className="reconciliation-panel__columns">
         <div className="reconciliation-column">
           <h4 className="reconciliation-column__title">Authorized</h4>
-          <dl className="reconciliation-column__body">
-            <dt>Execution id</dt>
-            <dd className="mono-num">{item.authorized.executionId || "none"}</dd>
-            <dt>Reported hash</dt>
-            <dd>
-              {item.authorized.reportedTransactionHash ? (
-                <HashValue value={item.authorized.reportedTransactionHash} kind="tx" linkToExplorer />
-              ) : (
-                "none"
-              )}
-            </dd>
-          </dl>
+          <div className="reconciliation-column__body">
+            <div className="reconciliation-field">
+              <span className="reconciliation-field__label">Execution id</span>
+              <span className="reconciliation-field__value mono-num">{item.authorized.executionId || "none"}</span>
+            </div>
+            <div className="reconciliation-field">
+              <span className="reconciliation-field__label">Reported hash</span>
+              <span className="reconciliation-field__value">
+                {item.authorized.reportedTransactionHash ? (
+                  <HashValue value={item.authorized.reportedTransactionHash} kind="tx" linkToExplorer />
+                ) : (
+                  "none"
+                )}
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="reconciliation-column">
@@ -69,30 +99,31 @@ export function ReconciliationPanel({ item }: { item: ReconciliationItemPayload 
 
         <div className="reconciliation-column">
           <h4 className="reconciliation-column__title">KeeperHub reported</h4>
-          <dl className="reconciliation-column__body">
-            <dt>Status</dt>
-            <dd className={item.keeperHubReported.status === "failed" ? "reconciliation-value--danger" : ""}>
-              {item.keeperHubReported.status}
-            </dd>
-            <dt>Receipt status</dt>
-            <dd>{item.keeperHubReported.receiptStatus}</dd>
+          <div className="reconciliation-column__body">
+            <div className="reconciliation-field">
+              <span className="reconciliation-field__label">Status</span>
+              <span
+                className={`reconciliation-field__value ${
+                  item.keeperHubReported.status === "failed" ? "reconciliation-value--danger" : ""
+                }`}
+              >
+                {item.keeperHubReported.status}
+              </span>
+            </div>
+            <div className="reconciliation-field">
+              <span className="reconciliation-field__label">Receipt status</span>
+              <span className="reconciliation-field__value">{item.keeperHubReported.receiptStatus}</span>
+            </div>
             {item.keeperHubReported.error ? (
-              <>
-                <dt>Error</dt>
-                <dd className="reconciliation-value--danger">{item.keeperHubReported.error}</dd>
-              </>
+              <div className="reconciliation-field">
+                <span className="reconciliation-field__label">Error</span>
+                <span className="reconciliation-field__value reconciliation-value--danger">
+                  <HexText text={item.keeperHubReported.error} />
+                </span>
+              </div>
             ) : null}
-          </dl>
-        </div>
-      </div>
-
-      <div className="reconciliation-panel__divergences">
-        {item.divergences.map((d, i) => (
-          <div className="reconciliation-divergence" key={i}>
-            <span className="reconciliation-divergence__type">{d.type}</span>
-            <span className="reconciliation-divergence__detail">{d.detail}</span>
           </div>
-        ))}
+        </div>
       </div>
     </section>
   );

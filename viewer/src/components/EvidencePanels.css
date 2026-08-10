@@ -62,6 +62,7 @@
 
 .evidence-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: var(--fs-xs);
 }
@@ -77,11 +78,23 @@
   border-bottom: 1px solid var(--hairline-strong);
 }
 
+.evidence-table th:first-child,
+.evidence-table td:first-child {
+  width: 32%;
+}
+
+.evidence-table th:nth-child(2),
+.evidence-table td:nth-child(2) {
+  width: 18%;
+}
+
 .evidence-table td {
   padding: var(--space-2);
   border-bottom: 1px solid var(--hairline);
   color: var(--ivory);
   vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .evidence-table__row--danger td:nth-child(2) {

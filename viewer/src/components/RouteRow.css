@@ -4,7 +4,14 @@
 }
 
 .route-row--anomaly {
-  box-shadow: inset 3px 0 0 var(--anomaly);
+  background: linear-gradient(90deg, rgb(155 123 212 / 9%) 0%, rgb(155 123 212 / 2%) 60%, transparent 100%);
+  box-shadow:
+    inset 3px 0 0 var(--anomaly),
+    inset 0 0 24px rgb(155 123 212 / 8%);
+}
+
+.route-row--anomaly .route-row__summary:hover {
+  background: rgb(155 123 212 / 8%);
 }
 
 .route-row__summary {
@@ -42,6 +49,19 @@
   color: var(--anomaly);
 }
 
+.route-row--cleared .route-row__lamp {
+  filter: drop-shadow(0 0 5px rgb(95 163 122 / 60%));
+}
+
+.route-row--latched .route-row__lamp {
+  filter: drop-shadow(0 0 5px rgb(193 84 58 / 60%));
+}
+
+.route-row--frozen .route-row__lamp,
+.route-row--anomaly .route-row__lamp {
+  filter: drop-shadow(0 0 6px rgb(155 123 212 / 70%));
+}
+
 .route-row__seq {
   font-size: var(--fs-2xs);
   color: var(--ivory-faint);
@@ -72,16 +92,20 @@
 }
 
 .route-row__anomaly-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--fs-2xs);
   font-weight: 700;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--anomaly);
-  border: 1px solid var(--anomaly-line);
+  border: 1px solid var(--anomaly);
   background: var(--anomaly-dim);
   border-radius: var(--radius-sm);
-  padding: 2px 6px;
+  padding: 2px 7px;
   white-space: nowrap;
+  box-shadow: var(--glow-anomaly);
 }
 
 .route-row__state {
@@ -121,6 +145,8 @@
   margin: 0;
   font-size: var(--fs-sm);
   color: var(--ivory-muted);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .route-row__reason--anomaly {
@@ -130,6 +156,7 @@
   border: 1px solid var(--anomaly-line);
   color: var(--anomaly);
   font-size: var(--fs-sm);
+  box-shadow: var(--glow-anomaly);
 }
 
 .route-row__evidence {

@@ -45,3 +45,13 @@ export function ArrowRightIcon() {
     </svg>
   );
 }
+
+/** Two claims on one track: the occupancy-anomaly mark used for a reconciliation divergence. */
+export function AnomalyMarkIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="6" cy="8" r="4.5" stroke="currentColor" strokeWidth="1.3" />
+      <circle cx="10" cy="8" r="4.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}

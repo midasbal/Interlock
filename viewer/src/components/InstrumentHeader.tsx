@@ -21,7 +21,7 @@ export function InstrumentHeader({ phase, integrity, errorMessage, summary, reve
 
   return (
     <header className={`panel-header ${revealed ? "panel-header--revealed" : ""}`}>
-      <div className="panel-header__inner">
+      <div className="panel-header__inner shell">
         <div className="panel-header__top">
           <div className="panel-header__title">
             <span className="panel-header__kicker">

@@ -15,6 +15,17 @@ body,
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-height) + var(--space-4));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   margin: 0;
   background: var(--base);
@@ -24,6 +35,40 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/*
+ * Defense in depth against horizontal overflow, on top of the specific
+ * fixes at each real trail value (HexText truncation, fixed table layout).
+ * This backstop makes an unbroken run wrap rather than silently clip
+ * against body's overflow-x: hidden if a spot is ever missed.
+ */
+p,
+span,
+td,
+dd,
+pre {
+  overflow-wrap: break-word;
+}
+
+/* Shared width rail every section aligns to: the panel owns its width. */
+.shell {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+/* Shared section typography, one voice across Overview, How it works, and the panel itself. */
+.section-kicker {
+  display: block;
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+  margin-bottom: var(--space-2);
 }
 
 ::selection {

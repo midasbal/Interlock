@@ -5,10 +5,11 @@
 
 .stage-track--locked {
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--anomaly-line);
+  border: 1px solid var(--anomaly);
   background: var(--anomaly-dim);
   border-radius: var(--radius-sm);
   width: fit-content;
+  box-shadow: var(--glow-anomaly);
 }
 
 .stage-track__locked-label {
@@ -54,16 +55,18 @@
 .stage-track--compact .stage-track__node--passed {
   background: var(--clear);
   border-color: var(--clear);
+  box-shadow: var(--glow-clear);
 }
 
 .stage-track--compact .stage-track__node--latched {
   background: var(--danger);
   border-color: var(--danger);
-  box-shadow: 0 0 5px rgb(193 84 58 / 60%);
+  box-shadow: var(--glow-danger-strong);
 }
 
 .stage-track--compact .stage-track__node--not-reached {
   background: transparent;
+  opacity: 0.55;
 }
 
 /* Full: labeled nodes for the expanded route */
@@ -91,6 +94,12 @@
     transform var(--dur-fast) var(--ease-latch);
 }
 
+.stage-track__node-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .stage-track__node-label {
   font-size: var(--fs-2xs);
   font-weight: 600;
@@ -102,6 +111,7 @@
 .stage-track--full .stage-track__node--passed {
   background: var(--clear-dim);
   border-color: var(--clear-line);
+  box-shadow: var(--glow-clear);
 }
 
 .stage-track--full .stage-track__node--passed .stage-track__node-label {
@@ -111,14 +121,18 @@
 .stage-track--full .stage-track__node--latched {
   background: var(--danger-dim);
   border-color: var(--danger);
+  box-shadow: var(--glow-danger-strong);
 }
 
 .stage-track--full .stage-track__node--latched .stage-track__node-label {
   color: var(--danger);
+  font-weight: 700;
 }
 
 .stage-track--full .stage-track__node--not-reached {
-  opacity: 0.4;
+  opacity: 0.32;
+  background: transparent;
+  border-style: dashed;
 }
 
 .stage-track--full .stage-track__node--not-reached .stage-track__node-label {
@@ -191,6 +205,18 @@
   border-color: var(--clear-line);
   background: var(--clear-dim);
   color: var(--clear);
+  box-shadow: var(--glow-clear);
+}
+
+.stage-track__node-stopped {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: none;
+  color: var(--danger);
+  opacity: 0.85;
 }
 
 .stage-track__destination--travel.stage-track__destination--live {

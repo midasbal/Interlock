@@ -1,0 +1,4 @@
+.hex-inline {
+  border-bottom: 1px dotted var(--ivory-faint);
+  cursor: help;
+}

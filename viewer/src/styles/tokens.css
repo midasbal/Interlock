@@ -23,6 +23,13 @@
   --anomaly-dim: rgb(155 123 212 / 18%);
   --anomaly-line: rgb(155 123 212 / 55%);
 
+  /* Emitted-light halos, restrained: a signal should look powered, not neon. */
+  --glow-clear: 0 0 8px rgb(95 163 122 / 40%);
+  --glow-danger: 0 0 8px rgb(193 84 58 / 40%);
+  --glow-danger-strong: 0 0 14px rgb(193 84 58 / 60%), 0 0 2px rgb(193 84 58 / 80%);
+  --glow-anomaly: 0 0 10px rgb(155 123 212 / 45%);
+  --glow-anomaly-strong: 0 0 20px rgb(155 123 212 / 55%), 0 0 3px rgb(155 123 212 / 85%);
+
   /* Type faces */
   --face-data: "IBM Plex Mono", ui-monospace, monospace;
   --face-display: "Archivo Variable", "Archivo", sans-serif;
@@ -52,6 +59,11 @@
 
   --radius-sm: 3px;
   --radius-md: 5px;
+
+  /* Layout: the panel owns its width, wide and deliberate, not a centered narrow column. */
+  --content-max: 1520px;
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+  --nav-height: 52px;
 
   --dur-fast: 160ms;
   --dur-mid: 360ms;

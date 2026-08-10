@@ -1,0 +1,49 @@
+.overview {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.overview__inner {
+  padding-top: var(--space-7);
+  padding-bottom: var(--space-6);
+}
+
+.overview__content {
+  max-width: 68ch;
+}
+
+.overview__title {
+  margin: 0 0 var(--space-4);
+  font-family: "Archivo Variable", var(--face-display);
+  font-weight: 600;
+  font-size: var(--fs-xl);
+  line-height: 1.25;
+  color: var(--ivory);
+  max-width: 26ch;
+}
+
+.overview__lede {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-md);
+  line-height: 1.65;
+  color: var(--ivory-muted);
+}
+
+.overview__thesis {
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: 1.65;
+  color: var(--ivory);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--clear-line);
+}
+
+@media (max-width: 720px) {
+  .overview__inner {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-5);
+  }
+
+  .overview__title {
+    font-size: var(--fs-lg);
+  }
+}
