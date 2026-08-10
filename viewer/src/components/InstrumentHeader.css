@@ -1,0 +1,113 @@
+.panel-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(180deg, var(--base) 0%, var(--base) 82%, rgb(14 21 22 / 0%) 100%);
+  border-bottom: 1px solid var(--hairline);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity var(--dur-slow) var(--ease-mech),
+    transform var(--dur-slow) var(--ease-mech);
+}
+
+.panel-header__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-6) var(--space-4);
+}
+
+.panel-header--revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.panel-header__top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.panel-header__title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.panel-header__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--face-data);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--ivory-muted);
+}
+
+.armed-indicator {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ivory);
+  animation: breathe 3.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .armed-indicator {
+    animation: none;
+    opacity: 0.75;
+  }
+}
+
+.panel-header__name {
+  margin: 0;
+  font-family: "Archivo Variable", var(--face-display);
+  font-stretch: 125%;
+  font-weight: 600;
+  font-size: var(--fs-2xl);
+  letter-spacing: -0.01em;
+  color: var(--ivory);
+}
+
+.panel-header__readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-4);
+  width: fit-content;
+  max-width: 100%;
+}
+
+@media (max-width: 720px) {
+  .panel-header__inner {
+    padding: var(--space-4);
+  }
+
+  .panel-header__name {
+    font-size: var(--fs-xl);
+  }
+
+  .panel-header__readouts {
+    padding: var(--space-2);
+  }
+}

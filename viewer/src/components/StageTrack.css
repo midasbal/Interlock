@@ -1,0 +1,220 @@
+.stage-track {
+  display: flex;
+  align-items: center;
+}
+
+.stage-track--locked {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--anomaly-line);
+  background: var(--anomaly-dim);
+  border-radius: var(--radius-sm);
+  width: fit-content;
+}
+
+.stage-track__locked-label {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--anomaly);
+}
+
+.stage-track__segment {
+  display: flex;
+  align-items: center;
+}
+
+.stage-track__line {
+  height: 1px;
+  background: var(--hairline-strong);
+}
+
+.stage-track__line--passed {
+  background: var(--clear-line);
+}
+
+.stage-track__line--not-reached {
+  background: var(--hairline);
+}
+
+/* Compact: small dots for the collapsed row */
+.stage-track--compact .stage-track__line {
+  width: 10px;
+}
+
+.stage-track--compact .stage-track__node {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ivory-ghost);
+  border: 1px solid var(--hairline-strong);
+  flex: none;
+}
+
+.stage-track--compact .stage-track__node--passed {
+  background: var(--clear);
+  border-color: var(--clear);
+}
+
+.stage-track--compact .stage-track__node--latched {
+  background: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 0 5px rgb(193 84 58 / 60%);
+}
+
+.stage-track--compact .stage-track__node--not-reached {
+  background: transparent;
+}
+
+/* Full: labeled nodes for the expanded route */
+.stage-track--full {
+  flex-wrap: wrap;
+  row-gap: var(--space-3);
+}
+
+.stage-track--full .stage-track__line {
+  width: clamp(16px, 3vw, 36px);
+}
+
+.stage-track--full .stage-track__node {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-raised);
+  transition:
+    background var(--dur-mid) var(--ease-mech),
+    border-color var(--dur-mid) var(--ease-mech),
+    box-shadow var(--dur-mid) var(--ease-mech),
+    transform var(--dur-fast) var(--ease-latch);
+}
+
+.stage-track__node-label {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stage-track--full .stage-track__node--passed {
+  background: var(--clear-dim);
+  border-color: var(--clear-line);
+}
+
+.stage-track--full .stage-track__node--passed .stage-track__node-label {
+  color: var(--clear);
+}
+
+.stage-track--full .stage-track__node--latched {
+  background: var(--danger-dim);
+  border-color: var(--danger);
+}
+
+.stage-track--full .stage-track__node--latched .stage-track__node-label {
+  color: var(--danger);
+}
+
+.stage-track--full .stage-track__node--not-reached {
+  opacity: 0.4;
+}
+
+.stage-track--full .stage-track__node--not-reached .stage-track__node-label {
+  color: var(--ivory-faint);
+}
+
+.stage-track__node--latch.stage-track__node--travel {
+  animation: mech-latch var(--dur-mid) var(--ease-latch) both;
+}
+
+@keyframes mech-latch {
+  0% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(1.14);
+  }
+  75% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Travel reveal: nodes and lines light up staged, driven by --stage-index */
+.stage-track__node--travel {
+  animation: stage-reveal var(--dur-fast) var(--ease-mech) both;
+  animation-delay: calc(var(--stage-index) * 90ms);
+}
+
+.stage-track__line--travel {
+  animation: line-reveal var(--dur-fast) var(--ease-mech) both;
+  animation-delay: calc((var(--stage-index) - 1) * 90ms + 40ms);
+}
+
+@keyframes stage-reveal {
+  from {
+    opacity: 0.25;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes line-reveal {
+  from {
+    opacity: 0.15;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.stage-track__destination {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--hairline-strong);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+}
+
+.stage-track__destination--live {
+  border-style: solid;
+  border-color: var(--clear-line);
+  background: var(--clear-dim);
+  color: var(--clear);
+}
+
+.stage-track__destination--travel.stage-track__destination--live {
+  animation: stage-reveal var(--dur-fast) var(--ease-mech) both;
+  animation-delay: calc(var(--stage-index) * 90ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-track__node--travel,
+  .stage-track__line--travel,
+  .stage-track__destination--travel,
+  .stage-track__node--latch.stage-track__node--travel {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .stage-track--full .stage-track__node-label {
+    font-size: 0.625rem;
+  }
+
+  .stage-track--full .stage-track__line {
+    width: 12px;
+  }
+}

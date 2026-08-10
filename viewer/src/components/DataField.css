@@ -1,0 +1,25 @@
+.data-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3) var(--space-5);
+}
+
+.data-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.data-field__label {
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+}
+
+.data-field__value {
+  font-size: var(--fs-sm);
+  color: var(--ivory);
+  word-break: break-word;
+}

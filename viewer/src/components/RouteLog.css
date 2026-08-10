@@ -1,0 +1,35 @@
+.route-log {
+  border-top: 1px solid var(--hairline);
+}
+
+.route-log__item {
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--dur-mid) var(--ease-mech),
+    transform var(--dur-mid) var(--ease-mech);
+}
+
+.route-log__item--revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.route-log__empty {
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  color: var(--ivory-muted);
+  font-size: var(--fs-sm);
+}
+
+.route-log__unknown {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-xs);
+  color: var(--ivory-faint);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.route-log__unknown pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

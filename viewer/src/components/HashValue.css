@@ -1,0 +1,16 @@
+.hash-value {
+  font-size: var(--fs-sm);
+  color: var(--ivory);
+}
+
+.hash-value--link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--clear);
+}
+
+.hash-value--link:hover {
+  text-decoration: none;
+  color: var(--ivory);
+}

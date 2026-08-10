@@ -1,0 +1,43 @@
+.note-row {
+  border-bottom: 1px solid var(--hairline);
+  background: var(--base);
+  padding: var(--space-3) var(--space-4);
+}
+
+.note-row__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.note-row__seq,
+.note-row__time {
+  font-size: var(--fs-2xs);
+  color: var(--ivory-faint);
+}
+
+.note-row__kind {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ivory-faint);
+}
+
+.note-row__heading {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--ivory-muted);
+}
+
+.note-row__body {
+  margin: 0;
+  font-family: var(--face-data);
+  font-size: var(--fs-xs);
+  color: var(--ivory-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.7;
+}
