@@ -49,9 +49,13 @@ export function IntegrityLamp({ phase, integrity, errorMessage }: Props) {
           <LampDot />
         </span>
         <div className="lamp__text">
-          <span className="lamp__label">Chain intact</span>
+          <span className="lamp__label">Chain verified live</span>
           <span className="lamp__detail mono-num" title={integrity.chainHead}>
             {integrity.entryCount} entries · head {truncateForDisplay(integrity.chainHead)}
+          </span>
+          <span className="lamp__hint">
+            Recomputed just now, in your browser, from this page's own copy of docs/audit-trail.jsonl. Same
+            algorithm as <code>npm run audit:verify</code>, run it yourself against the real file.
           </span>
         </div>
       </div>

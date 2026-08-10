@@ -15,6 +15,10 @@ function divergenceTitle(type: string): string {
   return DIVERGENCE_TITLE[type] ?? type;
 }
 
+const NET_OUTFLOW_CAPTION_SEQ = 96;
+const NET_OUTFLOW_CAPTION =
+  "This cap bounds authorized outflow, not real outflow, and it correctly refused transfer 3. The extra ETH here is a duplicate broadcast by the execution layer, caught by the reconciler, not a cap that failed.";
+
 export function ReconciliationPanel({ item }: { item: ReconciliationItemPayload }) {
   return (
     <section className="reconciliation-panel" aria-label="Reconciliation occupancy anomaly">
@@ -31,6 +35,10 @@ export function ReconciliationPanel({ item }: { item: ReconciliationItemPayload 
           .
         </p>
       </div>
+
+      {item.seq === NET_OUTFLOW_CAPTION_SEQ ? (
+        <p className="reconciliation-panel__caption">{NET_OUTFLOW_CAPTION}</p>
+      ) : null}
 
       <div className="reconciliation-panel__findings">
         {item.divergences.map((d, i) => (

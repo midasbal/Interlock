@@ -52,6 +52,24 @@
   color: var(--ivory-ghost);
 }
 
+/* Freeze is stage 0, distinct in kind from the five per-action checks that
+   follow it: a full-width band ahead of the pipeline grid, not one more
+   cell in the row of five, so it reads as a precondition, not step one of
+   six. */
+.stage-list__item--freeze {
+  grid-column: 1 / -1;
+  background: var(--anomaly-dim);
+  border-bottom: 1px solid var(--anomaly-line);
+}
+
+.stage-list__index--freeze {
+  color: var(--anomaly);
+}
+
+.stage-list__item--freeze .stage-list__name {
+  color: var(--anomaly);
+}
+
 .stage-list__name {
   display: block;
   font-size: var(--fs-sm);

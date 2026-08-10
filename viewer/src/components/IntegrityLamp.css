@@ -84,3 +84,16 @@
   white-space: nowrap;
   max-width: 42ch;
 }
+
+.lamp__hint {
+  margin-top: 2px;
+  font-size: var(--fs-2xs);
+  color: var(--ivory-faint);
+  line-height: 1.5;
+  max-width: 46ch;
+}
+
+.lamp__hint code {
+  font-family: var(--face-data);
+  color: var(--ivory-muted);
+}

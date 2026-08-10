@@ -1,6 +1,11 @@
 import { LampDot } from "./icons";
 import "./HowItWorksSection.css";
 
+const FREEZE_STAGE = {
+  name: "Freeze",
+  detail: "the master interlock precondition: a circuit breaker on the wallet itself, checked before anything else. Halts every action, revokes included, until a human re-affirms.",
+};
+
 const STAGES = [
   { name: "Policy", detail: "chain, target, and value-cap allowlists, purely local, no network call" },
   { name: "Effect verification", detail: "the real, traced effect of the exact call must match what its author declared" },
@@ -31,9 +36,16 @@ export function HowItWorksSection() {
     <section className="how-it-works" id="how-it-works" aria-label="How it works">
       <div className="shell how-it-works__inner">
         <span className="section-kicker">How it works</span>
-        <h2 className="how-it-works__title">One gate, five stages, in order</h2>
+        <h2 className="how-it-works__title">Freeze-first, then a five-stage pipeline</h2>
 
         <ol className="stage-list">
+          <li className="stage-list__item stage-list__item--freeze" key={FREEZE_STAGE.name}>
+            <span className="stage-list__index stage-list__index--freeze mono-num">00</span>
+            <div>
+              <span className="stage-list__name">{FREEZE_STAGE.name}</span>
+              <p className="stage-list__detail">{FREEZE_STAGE.detail}</p>
+            </div>
+          </li>
           {STAGES.map((stage, i) => (
             <li className="stage-list__item" key={stage.name}>
               <span className="stage-list__index mono-num">{String(i + 1).padStart(2, "0")}</span>

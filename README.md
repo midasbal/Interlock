@@ -103,10 +103,6 @@ recomputes the entire hash chain from `docs/audit-trail.jsonl` and reports the f
 
 External references: [issue #1979](https://github.com/KeeperHub/keeperhub/issues/1979), [PR #1980](https://github.com/KeeperHub/keeperhub/pull/1980).
 
-## Demo
-
-TODO(human): demo video and a link to a transaction executed via KeeperHub, filled in last, once packaging is otherwise done.
-
 ## Stack
 
 Solidity and Foundry for the testnet contracts, TypeScript and Node for the agent and policy engine, KeeperHub for execution, and a small viewer for the audit trail.

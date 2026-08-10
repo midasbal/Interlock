@@ -3,20 +3,87 @@
   align-items: center;
 }
 
-.stage-track--locked {
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--anomaly);
-  background: var(--anomaly-dim);
-  border-radius: var(--radius-sm);
-  width: fit-content;
-  box-shadow: var(--glow-anomaly);
+/* Freeze, stage 0: a diamond, not a rounded-rect, so it never reads as
+   "check one of six" next to the five per-action pipeline nodes. */
+.stage-track__freeze-node {
+  flex: none;
 }
 
-.stage-track__locked-label {
-  font-size: var(--fs-2xs);
+.stage-track__freeze-node--compact {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  border: 1px solid var(--hairline-strong);
+  background: var(--ivory-ghost);
+}
+
+.stage-track__freeze-node--compact.stage-track__freeze-node--clear {
+  background: var(--ivory-muted);
+  border-color: var(--ivory-muted);
+}
+
+.stage-track__freeze-node--compact.stage-track__freeze-node--tripped {
+  background: var(--anomaly);
+  border-color: var(--anomaly);
+  box-shadow: var(--glow-anomaly-strong);
+}
+
+.stage-track--full .stage-track__freeze-node {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--hairline-strong);
+  background: var(--surface-raised);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  transition:
+    background var(--dur-mid) var(--ease-mech),
+    border-color var(--dur-mid) var(--ease-mech),
+    box-shadow var(--dur-mid) var(--ease-mech);
+}
+
+.stage-track__freeze-node--clear {
+  border-color: var(--ivory-muted);
+}
+
+.stage-track__freeze-node--clear .stage-track__node-label {
+  color: var(--ivory);
+}
+
+.stage-track__freeze-node--clear .stage-track__freeze-tag {
+  color: var(--ivory-faint);
+}
+
+.stage-track__freeze-node--tripped {
+  background: var(--anomaly-dim);
+  border-color: var(--anomaly);
+  box-shadow: var(--glow-anomaly-strong);
+}
+
+.stage-track__freeze-node--tripped .stage-track__node-label {
+  color: var(--anomaly);
+  font-weight: 700;
+}
+
+.stage-track__freeze-node--tripped .stage-track__freeze-tag {
+  color: var(--anomaly);
+}
+
+.stage-track__freeze-tag {
+  display: block;
+  font-size: 0.5625rem;
   font-weight: 600;
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: var(--tracking-wider);
   text-transform: uppercase;
+  color: var(--ivory-faint);
+  margin-bottom: 1px;
+}
+
+/* Freeze tripped shares the "stopped here" caption style with a latched
+   per-action node, but freeze is always anomaly-purple, never danger-red,
+   so its own caption must not inherit the shared danger color. */
+.stage-track__freeze-node--tripped .stage-track__node-stopped {
   color: var(--anomaly);
 }
 
