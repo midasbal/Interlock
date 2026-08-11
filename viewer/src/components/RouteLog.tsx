@@ -1,5 +1,12 @@
 import type { RawEntry, ReconciliationItemPayload } from "../lib/types";
-import { isGateDecisionEntry, isNoteEntry, isReconciliationItemEntry, isReconciliationReportEntry } from "../lib/types";
+import {
+  isGateDecisionEntry,
+  isNoteEntry,
+  isReconciliationItemEntry,
+  isReconciliationReportEntry,
+  isWorkflowGateStageEntry,
+} from "../lib/types";
+import { GateStageRow } from "./GateStageRow";
 import { NoteRow } from "./NoteRow";
 import { RouteRow } from "./RouteRow";
 import { SweepItemRow, SweepReportRow } from "./SweepRow";
@@ -49,6 +56,14 @@ export function RouteLog({ entries, reconciliationIndex, revealed, reducedMotion
           return (
             <RouteLogItem key={entry.seq} revealed={revealed} style={style}>
               <NoteRow seq={entry.seq} heading={entry.payload.heading} note={entry.payload.note} timestamp={entry.timestamp} />
+            </RouteLogItem>
+          );
+        }
+
+        if (isWorkflowGateStageEntry(entry)) {
+          return (
+            <RouteLogItem key={entry.seq} revealed={revealed} style={style}>
+              <GateStageRow seq={entry.seq} timestamp={entry.timestamp} payload={entry.payload} />
             </RouteLogItem>
           );
         }

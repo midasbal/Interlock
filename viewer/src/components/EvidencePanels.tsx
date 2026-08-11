@@ -4,6 +4,7 @@ import type {
   EffectVerificationResult,
   ExecutionRef,
   FinalStatus,
+  FreezeEvidence,
   InvariantEvaluation,
   PolicyDecision,
   SimulateResult,
@@ -38,6 +39,28 @@ export function EvidenceSection({ title, tone, children }: { title: string; tone
       <h3 className="evidence-section__title">{title}</h3>
       <div className="evidence-section__body">{children}</div>
     </section>
+  );
+}
+
+export function FreezePanel({ evidence, pass }: { evidence: FreezeEvidence; pass: boolean }) {
+  return (
+    <EvidenceSection title="Freeze" tone={pass ? "clear" : "danger"}>
+      <DataFieldGrid>
+        <div className="data-field">
+          <span className="data-field__label">Wallet</span>
+          <span className="data-field__value">
+            <HashValue value={evidence.wallet} kind="address" />
+          </span>
+        </div>
+        <DataField label="Delegated" value={evidence.state.delegated ? "Yes" : "No"} mono={false} />
+        <div className="data-field">
+          <span className="data-field__label">Implementation</span>
+          <span className="data-field__value">
+            <HashValue value={evidence.state.implementation} kind="address" />
+          </span>
+        </div>
+      </DataFieldGrid>
+    </EvidenceSection>
   );
 }
 

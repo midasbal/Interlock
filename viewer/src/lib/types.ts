@@ -129,6 +129,20 @@ export interface NotePayload {
   note: string;
 }
 
+export interface FreezeEvidence {
+  kind: string;
+  timestamp: string;
+  wallet: string;
+  state: { delegated: boolean; implementation: string; rawCode: string };
+}
+
+export interface WorkflowGateStagePayload {
+  stage: string;
+  pass: boolean;
+  reason: string;
+  evidence: unknown;
+}
+
 export interface OnChainMatch {
   hash: string;
   blockNumber: number;
@@ -181,6 +195,12 @@ export function isGateDecisionEntry(
 
 export function isNoteEntry(entry: RawEntry): entry is RawEntry & { payload: NotePayload } {
   return entry.type === "note";
+}
+
+export function isWorkflowGateStageEntry(
+  entry: RawEntry
+): entry is RawEntry & { payload: WorkflowGateStagePayload } {
+  return entry.type === "workflow-gate-stage";
 }
 
 export function isReconciliationReportEntry(

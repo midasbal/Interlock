@@ -22,25 +22,28 @@ export function InstrumentHeader({ phase, integrity, errorMessage, summary, reve
   return (
     <header className={`panel-header ${revealed ? "panel-header--revealed" : ""}`}>
       <div className="panel-header__inner shell">
-        <div className="panel-header__top">
-          <div className="panel-header__title">
-            <h1 className="panel-header__name">Signal panel</h1>
-          </div>
-          <IntegrityLamp phase={phase} integrity={integrity} errorMessage={errorMessage} />
+        <div className="panel-header__title">
+          <h1 className="panel-header__name">Signal panel</h1>
         </div>
 
-        {summary ? (
-          <div className="panel-header__readouts">
-            <div className="panel-header__readouts-row" role="group" aria-label="Trail summary">
-              <ReadoutTile label="Total routes" value={summary.totalRoutes} />
-              <ReadoutTile label="Cleared" value={summary.cleared} tone="clear" />
-              <ReadoutTile label="Latched" value={summary.latched} tone="danger" />
-              <ReadoutTile label="Frozen" value={summary.frozen} tone="anomaly" />
-              <ReadoutTile label="Divergences flagged" value={summary.divergencesFlagged} tone="anomaly" />
-            </div>
-            {latchedBreakdown ? <p className="panel-header__readouts-breakdown">{latchedBreakdown}</p> : null}
+        <div className="panel-header__instrument">
+          <div className="panel-header__lamp-row">
+            <IntegrityLamp phase={phase} integrity={integrity} errorMessage={errorMessage} />
           </div>
-        ) : null}
+
+          {summary ? (
+            <>
+              <div className="panel-header__readouts-row" role="group" aria-label="Trail summary">
+                <ReadoutTile label="Total routes" value={summary.totalRoutes} />
+                <ReadoutTile label="Cleared" value={summary.cleared} tone="clear" />
+                <ReadoutTile label="Latched" value={summary.latched} tone="danger" />
+                <ReadoutTile label="Frozen" value={summary.frozen} tone="anomaly" />
+                <ReadoutTile label="Divergences flagged" value={summary.divergencesFlagged} tone="anomaly" />
+              </div>
+              {latchedBreakdown ? <p className="panel-header__readouts-breakdown">{latchedBreakdown}</p> : null}
+            </>
+          ) : null}
+        </div>
       </div>
     </header>
   );
