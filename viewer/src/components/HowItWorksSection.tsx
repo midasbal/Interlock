@@ -38,24 +38,26 @@ export function HowItWorksSection() {
         <span className="section-kicker">How it works</span>
         <h2 className="how-it-works__title">Freeze-first, then a five-stage pipeline</h2>
 
-        <ol className="stage-list">
-          <li className="stage-list__item stage-list__item--freeze" key={FREEZE_STAGE.name}>
+        <div className="stage-frame">
+          <div className="stage-list__item stage-list__item--freeze">
             <span className="stage-list__index stage-list__index--freeze mono-num">00</span>
             <div>
               <span className="stage-list__name">{FREEZE_STAGE.name}</span>
               <p className="stage-list__detail">{FREEZE_STAGE.detail}</p>
             </div>
-          </li>
-          {STAGES.map((stage, i) => (
-            <li className="stage-list__item" key={stage.name}>
-              <span className="stage-list__index mono-num">{String(i + 1).padStart(2, "0")}</span>
-              <div>
-                <span className="stage-list__name">{stage.name}</span>
-                <p className="stage-list__detail">{stage.detail}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+          </div>
+          <ol className="stage-list">
+            {STAGES.map((stage, i) => (
+              <li className="stage-list__item" key={stage.name}>
+                <span className="stage-list__index mono-num">{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <span className="stage-list__name">{stage.name}</span>
+                  <p className="stage-list__detail">{stage.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
 
         <h3 className="how-it-works__subtitle">Capabilities, shipped and proven on Base Sepolia</h3>
         <ul className="capability-list">

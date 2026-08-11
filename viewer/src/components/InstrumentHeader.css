@@ -45,13 +45,13 @@
 .panel-header__readouts {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
   gap: 0;
   background: var(--panel);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
   padding: var(--space-1) var(--space-4);
-  width: fit-content;
-  max-width: 100%;
+  width: 100%;
 }
 
 @media (max-width: 720px) {

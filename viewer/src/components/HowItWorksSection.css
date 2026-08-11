@@ -24,6 +24,21 @@
   color: var(--ivory-faint);
 }
 
+/* Owns the border, rounded corners, and the shared hairline gap-line trick
+   for both the freeze band and the five-stage grid inside it, so the two
+   read as one cohesive frame without sharing a single grid's column track
+   count, that sharing was the source of the empty trailing cell: freeze's
+   full-width span reserved a column the five-item row below never filled. */
+.stage-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
 .stage-list {
   list-style: none;
   margin: 0;
@@ -32,9 +47,6 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1px;
   background: var(--hairline);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-md);
-  overflow: hidden;
 }
 
 .stage-list__item {
@@ -57,9 +69,7 @@
    cell in the row of five, so it reads as a precondition, not step one of
    six. */
 .stage-list__item--freeze {
-  grid-column: 1 / -1;
   background: var(--anomaly-dim);
-  border-bottom: 1px solid var(--anomaly-line);
 }
 
 .stage-list__index--freeze {

@@ -9,8 +9,9 @@ export function OverviewSection() {
           <h2 className="overview__title">A safety-gated execution layer for autonomous onchain agents</h2>
           <p className="overview__lede">
             Interlock sits between an agent and the chain, built on KeeperHub. Every action it proposes, and every
-            action it originates on its own in response to a real threat, is simulated, checked against a declarative
-            policy, and signed only if it passes, with the full path recorded to a verifiable audit trail.
+            action it originates on its own in response to a real threat, passes one ordered gate, freeze first, then
+            policy, effect verification, invariants, and simulate, and is signed only once every stage clears, with
+            the full path recorded to a verifiable audit trail.
           </p>
           <p className="overview__thesis">
             The idea is an interlocking: an action is a route request, and the route is only set, only cleared to
