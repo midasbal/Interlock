@@ -24,10 +24,6 @@ export function InstrumentHeader({ phase, integrity, errorMessage, summary, reve
       <div className="panel-header__inner shell">
         <div className="panel-header__top">
           <div className="panel-header__title">
-            <span className="panel-header__kicker">
-              <span className="armed-indicator" aria-hidden="true" />
-              Interlock, armed
-            </span>
             <h1 className="panel-header__name">Signal panel</h1>
           </div>
           <IntegrityLamp phase={phase} integrity={integrity} errorMessage={errorMessage} />

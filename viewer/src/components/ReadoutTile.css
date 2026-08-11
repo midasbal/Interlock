@@ -1,6 +1,7 @@
 .readout {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 2px;
   padding: var(--space-3) var(--space-4);
   border-left: 1px solid var(--hairline);

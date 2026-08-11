@@ -32,45 +32,6 @@
   gap: 2px;
 }
 
-.panel-header__kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--face-data);
-  font-size: var(--fs-2xs);
-  font-weight: 500;
-  letter-spacing: var(--tracking-widest);
-  text-transform: uppercase;
-  color: var(--ivory-muted);
-}
-
-.armed-indicator {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ivory);
-  animation: breathe 3.4s ease-in-out infinite;
-}
-
-@keyframes breathe {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.85);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.15);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .armed-indicator {
-    animation: none;
-    opacity: 0.75;
-  }
-}
-
 .panel-header__name {
   margin: 0;
   font-family: "Archivo Variable", var(--face-display);
