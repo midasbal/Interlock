@@ -25,6 +25,7 @@
     "invariant:outflow": "node --env-file=.env --import tsx agent/src/run-invariant-outflow.ts",
     "reconcile": "node --env-file=.env --import tsx agent/src/run-reconciliation.ts",
     "reconcile:live": "node --env-file=.env --import tsx agent/src/run-reconciliation-live.ts",
+    "keeperhub:status": "node --env-file=.env --import tsx agent/src/keeperhub-status.ts",
     "test": "node --env-file=.env --import tsx --test agent/src/test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },

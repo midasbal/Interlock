@@ -107,7 +107,9 @@ async function main() {
   }
 
   console.log(`approval 1 tx: ${first.execution.transactionHash}`);
+  console.log(`approval 1 KeeperHub execution id: ${first.execution.executionId}`);
   console.log(`approval 2 tx: ${second.execution.transactionHash}`);
+  console.log(`approval 2 KeeperHub execution id: ${second.execution.executionId}`);
   console.log(`approval 3 blocked, nothing broadcast: ${third.reason}`);
 
   const allowanceA = await readAllowance(client, SPENDER_A);
