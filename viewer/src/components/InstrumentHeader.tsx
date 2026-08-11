@@ -30,12 +30,15 @@ export function InstrumentHeader({ phase, integrity, errorMessage, summary, reve
         </div>
 
         {summary ? (
-          <div className="panel-header__readouts" role="group" aria-label="Trail summary">
-            <ReadoutTile label="Total routes" value={summary.totalRoutes} />
-            <ReadoutTile label="Cleared" value={summary.cleared} tone="clear" />
-            <ReadoutTile label="Latched" value={summary.latched} tone="danger" sub={latchedBreakdown} />
-            <ReadoutTile label="Frozen" value={summary.frozen} tone="anomaly" />
-            <ReadoutTile label="Divergences flagged" value={summary.divergencesFlagged} tone="anomaly" />
+          <div className="panel-header__readouts">
+            <div className="panel-header__readouts-row" role="group" aria-label="Trail summary">
+              <ReadoutTile label="Total routes" value={summary.totalRoutes} />
+              <ReadoutTile label="Cleared" value={summary.cleared} tone="clear" />
+              <ReadoutTile label="Latched" value={summary.latched} tone="danger" />
+              <ReadoutTile label="Frozen" value={summary.frozen} tone="anomaly" />
+              <ReadoutTile label="Divergences flagged" value={summary.divergencesFlagged} tone="anomaly" />
+            </div>
+            {latchedBreakdown ? <p className="panel-header__readouts-breakdown">{latchedBreakdown}</p> : null}
           </div>
         ) : null}
       </div>

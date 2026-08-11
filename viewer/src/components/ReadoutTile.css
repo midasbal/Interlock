@@ -52,8 +52,12 @@
 
 @media (max-width: 720px) {
   .readout {
-    min-width: 45%;
-    flex: 1 1 45%;
+    min-width: 0;
+  }
+
+  .readout:nth-child(odd) {
+    border-left: none;
+    padding-left: 0;
   }
 
   .readout__sub {
