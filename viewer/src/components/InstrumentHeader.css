@@ -19,6 +19,7 @@
 
 .panel-header__title {
   margin-bottom: var(--space-3);
+  text-align: center;
 }
 
 .panel-header__name {
