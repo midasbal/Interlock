@@ -10,4 +10,5 @@ broadcast/
 
 # local-only project docs, never committed
 CLAUDE.md
-docs/
+docs/*
+!docs/BOUNTY.md

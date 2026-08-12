@@ -6,6 +6,8 @@ A safety-gated execution layer for autonomous onchain agents, built on KeeperHub
 
 Agents are good at deciding what to do. The dangerous part is the last mile: actually signing and sending the transaction. A reverting tx, a bad approval, a wrong call, or a compromised dependency all cash out at the exact moment of execution, and most agent projects treat that moment as an afterthought. Interlock puts one ordered gate in front of every onchain action, whoever originates it, and nothing is signed until that gate clears.
 
+Also entered for the Best Onboarding UX Improvement bounty. See the [Onboarding UX bounty](#onboarding-ux-bounty) section below and [BOUNTY.md](docs/BOUNTY.md).
+
 ## The gate model
 
 Freeze is stage 0, the master interlock precondition, checked first, before anything else runs. If the wallet is clear, the action runs a five-stage pipeline: policy, effect verification, invariants, simulate, execute. Freeze-first, then a five-stage pipeline.
@@ -103,6 +105,10 @@ recomputes the entire hash chain from `docs/audit-trail.jsonl` and reports the f
 
 External references: [issue #1979](https://github.com/KeeperHub/keeperhub/issues/1979), [PR #1980](https://github.com/KeeperHub/keeperhub/pull/1980).
 
+## Onboarding UX bounty
+
+During the build, kept a dated onboarding-friction teardown: seven reproducible issues on the real onboarding path (a self-contradicting action schema, field-name mismatches between the MCP and REST surfaces, an undocumented standing EIP-7702 delegation left on the wallet, and more), each with a concrete proposed fix. One reliability finding also came out of it, the double-broadcast plus false-status defect, disclosed as [issue #1979](https://github.com/KeeperHub/keeperhub/issues/1979) and fixed by KeeperHub in [PR #1980](https://github.com/KeeperHub/keeperhub/pull/1980). Full teardown in [BOUNTY.md](docs/BOUNTY.md).
+
 ## Stack
 
 Solidity and Foundry for the testnet contracts, TypeScript and Node for the agent and policy engine, KeeperHub for execution, and a small viewer for the audit trail.
@@ -111,7 +117,7 @@ Solidity and Foundry for the testnet contracts, TypeScript and Node for the agen
 
 Not early. The safety-gated execution spine, both directions (inbound self-gate and outbound autonomous defense), intent-versus-effect verification, delegation-integrity monitoring with gate freeze, outcome-based invariants with the policy digest anchored on-chain, the hash-chained and on-chain-anchored audit trail, the post-execution reconciler, and an adversarial-plus-property-based test suite are all real, shipped, and proven on Base Sepolia with the transactions linked above, at $0 spend.
 
-Roadmap: a second outbound trigger on a different real signal, bundle-level gating across a multi-step sequence, the demo video, and the bounty deliverable.
+Roadmap: a second outbound trigger on a different real signal, and bundle-level gating across a multi-step sequence.
 
 ## License
 
