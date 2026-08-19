@@ -1,3 +1,5 @@
+# 6th place, KeeperHub Agents Onchain hackathon (Aug 2026).
+
 # Interlock
 
 A safety-gated execution layer for autonomous onchain agents, built on KeeperHub. Interlock works like a machine interlock: the signature stays locked until safety is proven.
